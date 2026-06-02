@@ -122,8 +122,11 @@
               </select>
             </div>
           </div>
-          <div class="ff"><label>ДДС / IOSS на подателя <span class="muted small">(напр. Etsy UK ДДС)</span></label>
-            <input type="text" name="tax_id" placeholder="VAT: GB365883274  или  IOSS: IM1234567890">
+          <div class="ff"><label>Importer customs reference <span class="muted small">(напр. Etsy UK ДДС / EORI)</span></label>
+            <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  или  EORI: ...">
+          </div>
+          <div class="ff"><label>ДДС / IOSS на подателя <span class="muted small">(IOSS / VOEC)</span></label>
+            <input type="text" name="tax_id" placeholder="IOSS: IM1234567890">
           </div>
         </div>
 
@@ -246,7 +249,7 @@
 
   // Запомняй стойностите: помни последно използваните полета за пакета
   // (тегло/стойност/съдържание/валута/продукт/услуга/митница) в браузъра.
-  const REMEMBER = ['product','service_level','description','value','currency','weight_g','net_weight_g','quantity','content_type','hs_code','origin_country'];
+  const REMEMBER = ['product','service_level','description','value','currency','weight_g','net_weight_g','quantity','content_type','hs_code','origin_country','tax_id','importer_tax_id'];
   const form = document.querySelector('.a1-form');
   if(form){
     REMEMBER.forEach(n=>{

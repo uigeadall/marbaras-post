@@ -129,6 +129,7 @@ def new_shipment(request):
         hs_code=(g("hs_code") or "711311").strip(),
         origin_country=(g("origin_country") or "BG").strip().upper()[:2],
         tax_id=(g("tax_id") or "").strip(),
+        importer_tax_id=(g("importer_tax_id") or "").strip(),
     )
     messages.success(request, f"✅ Пратка #{s.pk} създадена (Неизпратени). Маркирай я → 🚀 Изпрати, за да създадеш етикета.")
     return redirect("dashboard")

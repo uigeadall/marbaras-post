@@ -71,11 +71,16 @@ class Shipment(models.Model):
     origin_country = models.CharField(
         max_length=2, default="BG", help_text="Country of origin (customs)"
     )
-    # Sender's customs/tax reference — e.g. Etsy UK VAT ("VAT: GB123456789")
-    # or an EU IOSS number ("IOSS: IM1234567890"). Goes in DPI senderTaxId.
+    # Sender's customs/tax reference — e.g. IOSS / VOEC number. DPI senderTaxId.
     tax_id = models.CharField(
         max_length=35, blank=True,
-        help_text="Sender VAT / IOSS, e.g. 'VAT: GB365883274' (Etsy UK) or 'IOSS: IM...'",
+        help_text="Sender VAT / IOSS, e.g. 'IOSS: IM1234567890'",
+    )
+    # Importer (recipient) customs reference — e.g. Etsy UK VAT or an EORI
+    # number. Prints as "Importer tax/customs ref" on the CN22. DPI importerTaxId.
+    importer_tax_id = models.CharField(
+        max_length=35, blank=True,
+        help_text="Importer customs ref, e.g. 'ETSY UK VAT:GB365883274' or 'EORI: ...'",
     )
 
     # DHL results

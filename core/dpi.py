@@ -153,6 +153,7 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         "addressLine2": _clean_text(shipment.address_line2, 40),
         "addressLine3": _clean_text(getattr(shipment, "address_line3", ""), 40),
         "senderTaxId": (getattr(shipment, "tax_id", "") or "").strip()[:35],
+        "importerTaxId": (getattr(shipment, "importer_tax_id", "") or "").strip()[:35],
         "city": _clean_text((shipment.city or "").rstrip(","), 30) or "City",
         "postalCode": ((shipment.postal_code or "").strip().upper()[:10]) or "0000",
         "destinationCountry": country,
