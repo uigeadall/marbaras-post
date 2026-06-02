@@ -1,0 +1,88 @@
+{% load static %}<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ BRAND.name }} — {{ t.hero_kicker }}{% endblock %}</title>
+  <meta name="description" content="{{ t.hero_sub }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <path d="M16 2 3 9v14l13 7 13-7V9L16 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M3 9l13 7 13-7M16 16v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M9.5 5.5 22.5 12.5" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="brand-name">{{ BRAND.name }}</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Main">
+        <a href="/#services">{{ t.nav_services }}</a>
+        <a href="/#how">{{ t.nav_how }}</a>
+        <a href="/#integrations">{{ t.nav_integrations }}</a>
+        <a href="/#pricing">{{ t.nav_pricing }}</a>
+        <a href="{% url 'track' %}">{{ t.nav_track }}</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="phone" href="tel:{{ BRAND.phone }}">📞 {{ BRAND.phone }}</a>
+        <a class="lang-toggle" href="?lang={{ other_lang }}">{{ t.lang_label }}</a>
+        <a class="btn btn-ghost" href="/app/">{{ t.nav_login }}</a>
+        <a class="btn btn-primary" href="/#quote">{{ t.cta_quote }}</a>
+        <button class="nav-burger" aria-label="Menu" onclick="document.body.classList.toggle('nav-open')">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="24" height="24">
+              <path d="M16 2 3 9v14l13 7 13-7V9L16 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M3 9l13 7 13-7M16 16v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-name">{{ BRAND.name }}</span>
+        </a>
+        <p>{{ t.footer_tagline }}</p>
+      </div>
+      <div class="footer-col">
+        <h4>{{ t.footer_company }}</h4>
+        <p>{{ BRAND.company }}</p>
+        <p>{{ BRAND.address }}</p>
+      </div>
+      <div class="footer-col">
+        <h4>{{ t.footer_hours }}</h4>
+        <p>{{ BRAND.hours }}</p>
+        <h4>{{ t.footer_contact }}</h4>
+        <p><a href="tel:{{ BRAND.phone }}">{{ BRAND.phone }}</a></p>
+        <p><a href="mailto:{{ BRAND.email }}">{{ BRAND.email }}</a></p>
+      </div>
+      <div class="footer-col">
+        <h4>{{ t.footer_legal }}</h4>
+        <p><a href="#">{{ t.footer_terms }}</a></p>
+        <p><a href="#">{{ t.footer_privacy }}</a></p>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© {% now "Y" %} {{ BRAND.company }}. {{ t.footer_rights }}</span>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

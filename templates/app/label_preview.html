@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <title>Преглед на етикет #{{ s.id }} — {{ brand.name }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #6b7280; font-family: Arial, Helvetica, sans-serif; padding: 24px; }
+    .toolbar { max-width: 384px; margin: 0 auto 16px; display: flex; gap: 8px; }
+    .toolbar button, .toolbar a { flex: 1; text-align: center; padding: 10px; border-radius: 8px;
+      border: 0; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; }
+    .print { background: #1652f0; color: #fff; }
+    .close { background: #e5e7eb; color: #111; }
+
+    /* 4x6 inch label at 96dpi ≈ 384x576px */
+    .label { width: 384px; height: 576px; background: #fff; margin: 0 auto;
+      border: 1px solid #000; position: relative; padding: 14px; display: flex; flex-direction: column; }
+    .draft-banner { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-22deg);
+      font-size: 56px; font-weight: 900; color: rgba(220,38,38,.16); letter-spacing: 4px;
+      white-space: nowrap; pointer-events: none; }
+    .row { display: flex; justify-content: space-between; align-items: flex-start; }
+    .prio { border: 2px solid #000; padding: 4px 10px; font-weight: 900; font-size: 15px; }
+    .carrier { text-align: right; font-size: 11px; line-height: 1.3; }
+    .carrier b { font-size: 13px; }
+    .tracked { display: inline-block; border: 1.5px solid #000; border-radius: 4px;
+      padding: 2px 8px; font-size: 10px; font-weight: 800; margin-top: 6px; }
+    hr { border: 0; border-top: 1px solid #000; margin: 10px 0; }
+    .lbl { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: .04em; }
+    .to { font-size: 15px; line-height: 1.35; margin-top: 2px; }
+    .to b { font-size: 17px; }
+    .meta { margin-top: auto; display: flex; justify-content: space-between; font-size: 11px; }
+    .meta div b { display: block; font-size: 15px; }
+    .barcode { margin-top: 10px; text-align: center; }
+    .bars { height: 56px; background: repeating-linear-gradient(90deg,
+      #000 0, #000 2px, #fff 2px, #fff 3px, #000 3px, #000 4px, #fff 4px, #fff 6px); }
+    .code { font-family: monospace; font-size: 13px; letter-spacing: 2px; margin-top: 4px; font-weight: 700; }
+    .sender { font-size: 9px; color: #444; margin-bottom: 6px; }
+    .note { max-width: 384px; margin: 14px auto 0; color: #fff; font-size: 12px; text-align: center; opacity: .9; }
+    @media print { body { background: #fff; padding: 0; } .toolbar, .note { display: none; } .label { border: none; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button class="print" onclick="window.print()">🖨️ Принтирай преглед</button>
+    <a class="close" href="#" onclick="window.close();return false;">Затвори</a>
+  </div>
+
+  <div class="label">
+    <div class="draft-banner">ЧЕРНОВА</div>
+
+    <div class="sender">Подател: {{ brand.company }} · {{ brand.address }} · {{ brand.phone }}</div>
+
+    <div class="row">
+      <div class="prio">PRIORITAIRE</div>
+      <div class="carrier">
+        <b>{{ brand.name }}</b><br>
+        via Deutsche Post Intl.<br>
+        {% if s.product == 'GMM' %}<span class="tracked">БЕЗ ТРАКИНГ</span>{% else %}<span class="tracked">TRACKED</span>{% endif %}
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="lbl">Получател / To</div>
+    <div class="to">
+      <b>{{ s.recipient_name }}</b><br>
+      {{ s.address_line1 }}<br>
+      {% if s.address_line2 %}{{ s.address_line2 }}<br>{% endif %}
+      {% if s.address_line3 %}{{ s.address_line3 }}<br>{% endif %}
+      {{ s.postal_code }} {{ s.city }}<br>
+      <b>{{ s.country }}</b>
+      {% if s.recipient_phone %}<br>☎ {{ s.recipient_phone }}{% endif %}
+      {% if s.tax_id %}<br><span class="lbl">{{ s.tax_id }}</span>{% endif %}
+    </div>
+
+    <div class="meta">
+      <div><span class="lbl">Тегло</span><b>{{ s.weight_g }} г</b></div>
+      <div><span class="lbl">Съдържание</span><b>{{ s.description }}</b></div>
+      <div><span class="lbl">Стойност</span><b>{{ s.value }} {{ s.currency }}</b></div>
+    </div>
+
+    <div class="barcode">
+      <div class="bars"></div>
+      <div class="code">{% if s.tracking_number %}{{ s.tracking_number }}{% else %}— ще се генерира при изпращане —{% endif %}</div>
+    </div>
+  </div>
+
+  <p class="note">⚠️ Това е <b>преглед</b> от твоите данни — не е валиден етикет. Истинският баркод и AWB се генерират от DHL при <b>Изпрати</b>.</p>
+</body>
+</html>

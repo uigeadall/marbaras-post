@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t.nav_track }} — {{ BRAND.name }}{% endblock %}
+
+{% block content %}
+<section class="section track-page">
+  <div class="container narrow">
+    <span class="kicker center">{{ t.nav_track }}</span>
+    <h1 class="section-title">{{ t.track_title }}</h1>
+
+    <form class="track-box solo" action="{% url 'track' %}" method="get">
+      <div class="track-row">
+        <input type="text" name="number" value="{{ barcode }}" placeholder="{{ t.track_placeholder }}" required autofocus>
+        <button class="btn btn-accent" type="submit">{{ t.track_button }}</button>
+      </div>
+    </form>
+
+    {% if searched %}
+      {% if result %}
+        <div class="track-result">
+          <div class="track-head">
+            <div>
+              <span class="muted">{{ t.track_results_title }}</span>
+              <h2 class="mono">{{ result.barcode }}</h2>
+            </div>
+            <span class="status-pill">{{ result.status }}</span>
+          </div>
+          {% if result.demo %}<p class="demo-note">⚙️ Demo data — connect DHL/DPI credentials to show live events.</p>{% endif %}
+          <ol class="timeline">
+            {% for ev in result.events reversed %}
+              <li>
+                <span class="dot"></span>
+                <div class="tl-body">
+                  <strong>{{ ev.status }}</strong>
+                  <span class="muted">{{ ev.location }}</span>
+                  <span class="tl-date">{{ ev.date }}</span>
+                </div>
+              </li>
+            {% endfor %}
+          </ol>
+        </div>
+      {% else %}
+        <div class="track-empty">
+          <p>🔍 {{ t.track_not_found }}</p>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

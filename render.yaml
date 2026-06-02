@@ -1,0 +1,26 @@
+# Render Blueprint for Marbaras Post.
+# Free web service + a free subdomain (marbaras-post.onrender.com).
+# DHL/DPI credentials are NOT here — set them in the Render dashboard so they
+# stay out of git.
+services:
+  - type: web
+    name: marbaras-post
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn marbaras_post.wsgi:application"
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      # --- set these in the dashboard (Environment tab), not here ---
+      # GLOBAL_MAIL_API_KEY
+      # GLOBAL_MAIL_API_SECRET
+      # GLOBAL_MAIL_CUSTOMER_EKP
+      # GLOBAL_MAIL_TEST_MODE
+      # GLOBAL_MAIL_DISABLE_BUILTIN_PRODUCT_MAP

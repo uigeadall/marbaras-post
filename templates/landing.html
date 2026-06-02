@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <span class="kicker">{{ t.hero_kicker }}</span>
+      <h1>{{ t.hero_title }}</h1>
+      <p class="lead">{{ t.hero_sub }}</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="/app/">{{ t.hero_cta_primary }}</a>
+        <a class="btn btn-ghost btn-lg" href="#track">{{ t.hero_cta_secondary }}</a>
+      </div>
+
+      <form class="track-box" id="track" action="{% url 'track' %}" method="get">
+        <label>{{ t.track_title }}</label>
+        <div class="track-row">
+          <input type="text" name="number" placeholder="{{ t.track_placeholder }}" required>
+          <button class="btn btn-accent" type="submit">{{ t.track_button }}</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <div class="parcel-card float-a">
+        <div class="pc-bar"></div>
+        <div class="pc-lines"><span></span><span></span><span></span></div>
+        <div class="pc-code">LY 709 462 891 DE</div>
+      </div>
+      <div class="map-dots"></div>
+      <div class="plane">✈</div>
+    </div>
+  </div>
+
+  <div class="container stats">
+    <div class="stat"><strong>220+</strong><span>{{ t.stats_countries }}</span></div>
+    <div class="stat"><strong>1.2M+</strong><span>{{ t.stats_parcels }}</span></div>
+    <div class="stat"><strong>98.6%</strong><span>{{ t.stats_uptime }}</span></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="container">
+    <span class="kicker center">{{ t.services_kicker }}</span>
+    <h2 class="section-title">{{ t.services_title }}</h2>
+    <div class="cards">
+      <article class="card">
+        <div class="card-ico">🌍</div>
+        <h3>{{ t.service_1_title }}</h3>
+        <p>{{ t.service_1_text }}</p>
+      </article>
+      <article class="card">
+        <div class="card-ico">⚡</div>
+        <h3>{{ t.service_2_title }}</h3>
+        <p>{{ t.service_2_text }}</p>
+      </article>
+      <article class="card">
+        <div class="card-ico">🧭</div>
+        <h3>{{ t.service_3_title }}</h3>
+        <p>{{ t.service_3_text }}</p>
+      </article>
+      <article class="card">
+        <div class="card-ico">↩️</div>
+        <h3>{{ t.service_4_title }}</h3>
+        <p>{{ t.service_4_text }}</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section section-alt" id="how">
+  <div class="container">
+    <span class="kicker center">{{ t.how_kicker }}</span>
+    <h2 class="section-title">{{ t.how_title }}</h2>
+    <div class="steps">
+      <div class="step"><span class="step-n">1</span><h3>{{ t.how_1_title }}</h3><p>{{ t.how_1_text }}</p></div>
+      <div class="step"><span class="step-n">2</span><h3>{{ t.how_2_title }}</h3><p>{{ t.how_2_text }}</p></div>
+      <div class="step"><span class="step-n">3</span><h3>{{ t.how_3_title }}</h3><p>{{ t.how_3_text }}</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section class="section" id="integrations">
+  <div class="container center">
+    <span class="kicker center">{{ t.integrations_kicker }}</span>
+    <h2 class="section-title">{{ t.integrations_title }}</h2>
+    <p class="section-sub">{{ t.integrations_sub }}</p>
+    <div class="logos">
+      {% for name in INTEGRATIONS %}<span class="logo-chip">{{ name }}</span>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section section-alt" id="pricing">
+  <div class="container">
+    <span class="kicker center">{{ t.pricing_kicker }}</span>
+    <h2 class="section-title">{{ t.pricing_title }}</h2>
+    <div class="plans">
+      <div class="plan">
+        <h3>{{ t.plan_std_name }}</h3>
+        <p class="plan-desc">{{ t.plan_std_desc }}</p>
+        <div class="plan-price">{{ t.plan_std_price }}</div>
+      </div>
+      <div class="plan plan-featured">
+        <div class="plan-badge">★</div>
+        <h3>{{ t.plan_exp_name }}</h3>
+        <p class="plan-desc">{{ t.plan_exp_desc }}</p>
+        <div class="plan-price">{{ t.plan_exp_price }}</div>
+      </div>
+      <div class="plan">
+        <h3>{{ t.plan_biz_name }}</h3>
+        <p class="plan-desc">{{ t.plan_biz_desc }}</p>
+        <div class="plan-price">{{ t.plan_biz_price }}</div>
+      </div>
+    </div>
+    <div class="center"><a class="btn btn-ghost" href="#">{{ t.pricing_cta }}</a></div>
+  </div>
+</section>
+
+<!-- QUOTE CTA -->
+<section class="cta-band" id="quote">
+  <div class="container cta-inner">
+    <h2>{{ t.quote_title }}</h2>
+    <form class="quote-form" onsubmit="event.preventDefault(); this.reset(); document.getElementById('quote-done').hidden=false;">
+      <input type="email" placeholder="{{ t.quote_placeholder }}" required>
+      <button class="btn btn-accent" type="submit">{{ t.quote_button }}</button>
+    </form>
+    <p class="quote-done" id="quote-done" hidden>✅ {{ t.quote_done }}</p>
+  </div>
+</section>
+{% endblock %}
