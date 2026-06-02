@@ -8,7 +8,9 @@ services:
     runtime: python
     plan: free
     buildCommand: "./build.sh"
-    startCommand: "gunicorn marbaras_post.wsgi:application"
+    # --timeout 120: DHL/DPI calls (auth + create + product fallback) can take
+    # longer than gunicorn's default 30s, especially on a cold free instance.
+    startCommand: "gunicorn marbaras_post.wsgi:application --timeout 120 --workers 2"
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
