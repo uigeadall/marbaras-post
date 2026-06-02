@@ -100,6 +100,15 @@ def _sanitize_phone(raw: str) -> str:
     return (("+" + s.lstrip()) if has_plus else s).strip()[:25]
 
 
+def _clean_text(value: str, maxlen: int) -> str:
+    """Satisfy DPI's field pattern ``^(?![=\\-\\+@])[^?�]*$``: drop the
+    replacement char and question marks, never start with = - + @ (DHL rejects
+    those as injection risks), trim to maxlen."""
+    s = (value or "").replace("?", "").replace("�", "")
+    s = s.strip().lstrip("=-+@").strip()
+    return s[:maxlen]
+
+
 def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
     """Build the DPI item payload for one Shipment."""
     country = (shipment.country or "BG").upper()[:2]
@@ -114,36 +123,39 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
     # Non-EU destinations require a recipient phone OR email. If the pasted
     # address has neither, fall back to a configured contact so it still books.
     phone = _sanitize_phone(shipment.recipient_phone)
-    email = (shipment.recipient_email or "")[:60]
+    email = (shipment.recipient_email or "").strip()[:50]  # DPI max 50
     if not phone and not email:
         brand = _cfg("BRAND", {})
         email = (
             _cfg("GLOBAL_MAIL_FALLBACK_EMAIL", "")
             or (brand.get("email") if isinstance(brand, dict) else "")
             or "noreply@marbaras-post.local"
-        )
+        )[:50]
+    # serviceLevel must be PRIORITY or REGISTERED (the only values DPI accepts).
+    service = (shipment.service_level or "PRIORITY").upper()
+    if service not in ("PRIORITY", "REGISTERED"):
+        service = "PRIORITY"
     return {
         "product": product,
-        "serviceLevel": shipment.service_level or "PRIORITY",
-        "recipient": (shipment.recipient_name or "Recipient")[:35],
+        "serviceLevel": service,
+        "recipient": _clean_text(shipment.recipient_name, 35) or "Recipient",
         "recipientPhone": phone,
         "recipientEmail": email,
-        "addressLine1": (shipment.address_line1 or "Address")[:40],
-        "addressLine2": (shipment.address_line2 or "")[:40],
-        "addressLine3": (getattr(shipment, "address_line3", "") or "")[:40],
-        "senderTaxId": (getattr(shipment, "tax_id", "") or "")[:35],
-        "city": ((shipment.city or "").strip().rstrip(",")[:30]) or "City",
-        "postalCode": ((shipment.postal_code or "").strip()[:10]) or "0000",
+        "addressLine1": _clean_text(shipment.address_line1, 40) or "Address",
+        "addressLine2": _clean_text(shipment.address_line2, 40),
+        "addressLine3": _clean_text(getattr(shipment, "address_line3", ""), 40),
+        "senderTaxId": (getattr(shipment, "tax_id", "") or "").strip()[:35],
+        "city": _clean_text((shipment.city or "").rstrip(","), 30) or "City",
+        "postalCode": ((shipment.postal_code or "").strip().upper()[:10]) or "0000",
         "destinationCountry": country,
         "shipmentAmount": value,
-        "shipmentCurrency": (shipment.currency or "EUR")[:3],
+        "shipmentCurrency": (shipment.currency or "EUR").upper()[:3],
         "shipmentGrossWeight": weight,
         "shipmentNaturetype": getattr(shipment, "content_type", "") or "SALE_GOODS",
         "returnItemWanted": False,
-        "custRef": f"S{shipment.pk}",
+        "custRef": f"S{shipment.pk}"[:28],
         "contents": [
             {
-                "contentPieceIndexNumber": 1,
                 "contentPieceAmount": 1,
                 "contentPieceDescription": desc,
                 "contentPieceHsCode": (getattr(shipment, "hs_code", "") or _cfg("GLOBAL_MAIL_HS_CODE", "711311")),

@@ -170,5 +170,5 @@ PRODUCTS = [
 ]
 SERVICE_LEVELS = [
     ("PRIORITY", "Приоритет"),
-    ("ECONOMY", "Икономична"),
+    ("REGISTERED", "Препоръчана"),
 ]
