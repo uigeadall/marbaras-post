@@ -37,6 +37,17 @@ def _cfg(key, default=""):
     return getattr(settings, key, default)
 
 
+def _http(method: str, url: str, **kwargs):
+    """requests wrapper that never raises — returns the Response, or None on a
+    network error (timeout / connection refused / DNS). Callers treat None as a
+    failure, so a DHL outage yields a friendly message instead of a 500."""
+    try:
+        return requests.request(method, url, **kwargs)
+    except requests.RequestException as exc:
+        logger.error("DPI request failed: %s %s — %s", method, url, exc)
+        return None
+
+
 def get_token() -> Optional[str]:
     key, secret = _cfg("GLOBAL_MAIL_API_KEY"), _cfg("GLOBAL_MAIL_API_SECRET")
     if not (key and secret):
@@ -46,17 +57,25 @@ def get_token() -> Optional[str]:
     now = time.time()
     if cached and cached["expires_at"] > now + 60:
         return cached["token"]
-    r = requests.get(
+    r = _http(
+        "GET",
         f"{_host()}/dpi/v1/auth/accesstoken",
         auth=(key, secret),
         headers={"Accept": "application/json"},
         timeout=15,
     )
-    if r.status_code != 200:
-        logger.error("DPI auth %s: %s", r.status_code, r.text[:200])
+    if r is None or r.status_code != 200:
+        if r is not None:
+            logger.error("DPI auth %s: %s", r.status_code, r.text[:200])
         return None
-    data = r.json()
+    try:
+        data = r.json()
+    except ValueError:
+        logger.error("DPI auth returned non-JSON")
+        return None
     token = data.get("access_token")
+    if not token:
+        return None
     ttl = int(data.get("expires_in") or 14400)
     _token_cache[ck] = {"token": token, "expires_at": now + min(ttl, 14400)}
     return token
@@ -180,7 +199,7 @@ def create_label(shipment, *, finalize: bool = True) -> Dict[str, Any]:
     r = None
     for cand in candidates:
         payload["items"][0]["product"] = cand
-        r = requests.post(f"{_host()}/dpi/shipping/v1/orders", json=payload, headers=headers, timeout=60)
+        r = _http("POST", f"{_host()}/dpi/shipping/v1/orders", json=payload, headers=headers, timeout=60)
         if r.status_code in (200, 201):
             break
         t = (r.text or "").lower()
@@ -251,7 +270,7 @@ def create_order_for_many(shipments, *, finalize: bool) -> Dict[int, Dict[str, A
         for cand in candidates:
             for it in items:
                 it["product"] = cand
-            r = requests.post(f"{_host()}/dpi/shipping/v1/orders", json=payload, headers=headers, timeout=90)
+            r = _http("POST", f"{_host()}/dpi/shipping/v1/orders", json=payload, headers=headers, timeout=90)
             if r.status_code in (200, 201):
                 break
             t = (r.text or "").lower()
@@ -320,7 +339,7 @@ def add_items_to_order(order_id: str, shipments) -> Dict[int, Dict[str, Any]]:
     for cand in candidates:
         for it in items:
             it["product"] = cand
-        r = requests.post(url, json=items, headers=headers, timeout=60)
+        r = _http("POST", url, json=items, headers=headers, timeout=60)
         if r.status_code in (200, 201):
             break
         t = (r.text or "").lower()
@@ -368,12 +387,15 @@ def finalize_order(order_id: str) -> Dict[str, Any]:
         "telephoneNumber": (brand.get("phone") if isinstance(brand, dict) else "+359888000000"),
         "awbCopyCount": 1,
     }
-    r = requests.post(
+    r = _http(
+        "POST",
         f"{_host()}/dpi/shipping/v1/orders/{order_id}/finalization",
         json=paperwork,
         headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "Accept": "application/json"},
         timeout=90,
     )
+    if r is None:
+        return {"ok": False, "error": "DHL unreachable (network error)."}
     if r.status_code not in (200, 201):
         return {"ok": False, "status_code": r.status_code, "error": (r.text or "")[:300]}
     body = r.json() or {}
@@ -390,11 +412,14 @@ def delete_item(item_id: str) -> Dict[str, Any]:
     token = get_token()
     if not token or not item_id:
         return {"ok": False, "error": "no token/item"}
-    r = requests.delete(
+    r = _http(
+        "DELETE",
         f"{_host()}/dpi/shipping/v1/items/{item_id}",
         headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
         timeout=30,
     )
+    if r is None:
+        return {"ok": False, "error": "DHL unreachable (network error)."}
     if r.status_code in (200, 204):
         return {"ok": True}
     t = (r.text or "").lower()
@@ -411,13 +436,14 @@ def get_item_label(item_id: str) -> Optional[bytes]:
     token = get_token()
     if not token or not item_id:
         return None
-    r = requests.get(
+    r = _http(
+        "GET",
         f"{_host()}/dpi/shipping/v1/items/{item_id}/label",
         headers={"Authorization": f"Bearer {token}", "Accept": "application/pdf"},
         params={"pageSize": "4x6"},
         timeout=30,
     )
-    if r.status_code != 200 or not r.content:
+    if r is None or r.status_code != 200 or not r.content:
         logger.error("DPI item label %s: %s", r.status_code, (r.text or "")[:200])
         return None
     return refit_pdf_to_4x6(r.content)
@@ -429,12 +455,13 @@ def get_awb_paperwork(awb: str) -> Optional[bytes]:
     token = get_token()
     if not token or not awb:
         return None
-    r = requests.get(
+    r = _http(
+        "GET",
         f"{_host()}/dpi/shipping/v1/shipments/{awb}/awblabels",
         headers={"Authorization": f"Bearer {token}", "Accept": "application/pdf"},
         timeout=60,
     )
-    if r.status_code != 200 or not r.content:
+    if r is None or r.status_code != 200 or not r.content:
         logger.error("DPI awb paperwork %s: %s", r.status_code, (r.text or "")[:200])
         return None
     return r.content
@@ -445,7 +472,8 @@ def get_item_labels_for_awb(awb: str) -> Optional[bytes]:
     token = get_token()
     if not token or not awb:
         return None
-    r = requests.get(
+    r = _http(
+        "GET",
         f"{_host()}/dpi/shipping/v1/shipments/{awb}/itemlabels",
         headers={
             "Authorization": f"Bearer {token}",
@@ -453,7 +481,7 @@ def get_item_labels_for_awb(awb: str) -> Optional[bytes]:
         },
         timeout=60,
     )
-    if r.status_code != 200 or not r.content:
+    if r is None or r.status_code != 200 or not r.content:
         return None
     return r.content
 

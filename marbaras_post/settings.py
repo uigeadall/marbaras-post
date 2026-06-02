@@ -30,18 +30,29 @@ def env(key, default=""):
 
 
 SECRET_KEY = env("DJANGO_SECRET_KEY", "dev-insecure-change-me-in-production")
-DEBUG = env("DJANGO_DEBUG", "True").lower() in ("1", "true", "yes", "on")
+
+# On a hosting platform (Railway/Render) default DEBUG to False for safety, so a
+# forgotten env var can't expose the debug page. Local stays True.
+_ON_HOST = bool(
+    env("RAILWAY_PUBLIC_DOMAIN", "") or env("RAILWAY_ENVIRONMENT", "")
+    or env("RENDER_EXTERNAL_HOSTNAME", "")
+)
+DEBUG = env("DJANGO_DEBUG", "False" if _ON_HOST else "True").lower() in (
+    "1", "true", "yes", "on",
+)
 ALLOWED_HOSTS = [h for h in env("DJANGO_ALLOWED_HOSTS", "*").split(",") if h] or ["*"]
 CSRF_TRUSTED_ORIGINS = [
     o for o in env("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o
 ]
-# Render provides the external hostname at runtime — trust it automatically so
-# logins/forms work over HTTPS without extra config.
-_render_host = env("RENDER_EXTERNAL_HOSTNAME", "")
-if _render_host:
-    ALLOWED_HOSTS.append(_render_host)
-    CSRF_TRUSTED_ORIGINS.append(f"https://{_render_host}")
+# Trust the platform's external hostname at runtime so logins/forms work over
+# HTTPS without extra config (Render + Railway).
+for _host_env in ("RENDER_EXTERNAL_HOSTNAME", "RAILWAY_PUBLIC_DOMAIN"):
+    _h = env(_host_env, "")
+    if _h:
+        ALLOWED_HOSTS.append(_h)
+        CSRF_TRUSTED_ORIGINS.append(f"https://{_h}")
 CSRF_TRUSTED_ORIGINS.append("https://*.onrender.com")
+CSRF_TRUSTED_ORIGINS.append("https://*.up.railway.app")
 
 INSTALLED_APPS = [
     "django.contrib.admin",

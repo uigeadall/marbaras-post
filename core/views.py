@@ -217,7 +217,7 @@ def create_label(request, pk):
         s.status = "failed"
         s.notes = f"HTTP {res.get('status_code')}: {res.get('error')}"
         s.save(update_fields=["status", "notes"])
-        messages.error(request, f"#{s.pk} неуспешна: {res.get('error')[:160]}")
+        messages.error(request, f"#{s.pk} неуспешна: {(res.get('error') or '')[:160]}")
     return redirect("dashboard")
 
 
