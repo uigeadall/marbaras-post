@@ -112,7 +112,15 @@ def _clean_text(value: str, maxlen: int) -> str:
 def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
     """Build the DPI item payload for one Shipment."""
     country = (shipment.country or "BG").upper()[:2]
-    weight = max(int(shipment.weight_g or 100), 10)
+    # Gross = the whole parcel (envelope + goods); net = the goods only (customs).
+    gross = max(int(shipment.weight_g or 100), 10)
+    try:
+        net = int(getattr(shipment, "net_weight_g", 0) or 0)
+    except (TypeError, ValueError):
+        net = 0
+    if net <= 0:
+        net = gross               # default: declare net = gross
+    net = max(min(net, gross), 1)  # net must be ≥1g and never exceed gross
     value = max(round(float(shipment.value or 1), 2), 1.0)
     product = (shipment.product or "").strip() or resolve_product(country)
     # DHL requires the content description to be 3–33 chars for cross-border
@@ -150,7 +158,7 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         "destinationCountry": country,
         "shipmentAmount": value,
         "shipmentCurrency": (shipment.currency or "EUR").upper()[:3],
-        "shipmentGrossWeight": weight,
+        "shipmentGrossWeight": gross,
         "shipmentNaturetype": getattr(shipment, "content_type", "") or "SALE_GOODS",
         "returnItemWanted": False,
         # Customer reference: the operator's own (Reference field). Falls back to
@@ -163,7 +171,7 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
                 "contentPieceHsCode": (getattr(shipment, "hs_code", "") or _cfg("GLOBAL_MAIL_HS_CODE", "711311")),
                 "contentPieceOrigin": (getattr(shipment, "origin_country", "") or _cfg("SHOP_COUNTRY", "BG")),
                 "contentPieceValue": f"{value:.2f}",
-                "contentPieceNetweight": weight,
+                "contentPieceNetweight": net,
             }
         ],
     }

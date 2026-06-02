@@ -122,6 +122,7 @@ def new_shipment(request):
         description=(g("description") or "Goods").strip(),
         quantity=int(g("quantity")) if (g("quantity") or "").isdigit() else 1,
         weight_g=int(g("weight_g")) if (g("weight_g") or "").isdigit() else 100,
+        net_weight_g=int(g("net_weight_g")) if (g("net_weight_g") or "").isdigit() else 0,
         value=_dec(g("value"), "1") if g("value") else Decimal("1"),
         currency=(g("currency") or "EUR").upper()[:3],
         content_type=(g("content_type") or "SALE_GOODS"),

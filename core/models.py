@@ -42,7 +42,10 @@ class Shipment(models.Model):
     # Parcel
     description = models.CharField(max_length=64, default="Goods")
     quantity = models.PositiveIntegerField(default=1, help_text="Number of items in the parcel")
-    weight_g = models.PositiveIntegerField(default=100, help_text="Gross weight in grams")
+    weight_g = models.PositiveIntegerField(default=100, help_text="Gross weight in grams (parcel incl. packaging)")
+    net_weight_g = models.PositiveIntegerField(
+        default=0, help_text="Net weight of the goods only (customs); 0 = use parcel weight"
+    )
     value = models.DecimalField(max_digits=10, decimal_places=2, default=1)
     currency = models.CharField(max_length=3, default="EUR")
     product = models.CharField(
