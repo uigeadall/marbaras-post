@@ -68,11 +68,14 @@
           <div class="ff"><label>Пощенски код <span class="req">*</span></label><input type="text" name="postal_code" id="f_postal" required></div>
           <div class="ff"><label>Град <span class="req">*</span></label><input type="text" name="city" id="f_city" required></div>
         </div>
-        <div class="ff"><label>Държава <span class="req">*</span></label>
-          <select name="country" id="f_country" required>
-            <option value="">— Избери държава —</option>
-            {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
-          </select>
+        <div class="ff2">
+          <div class="ff"><label>State / регион <span class="muted small">(по избор)</span></label><input type="text" name="state" id="f_state"></div>
+          <div class="ff"><label>Държава <span class="req">*</span></label>
+            <select name="country" id="f_country" required>
+              <option value="">— Избери държава —</option>
+              {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
+            </select>
+          </div>
         </div>
         <div class="ff2">
           <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>

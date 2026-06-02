@@ -36,6 +36,7 @@ class Shipment(models.Model):
     address_line2 = models.CharField(max_length=120, blank=True)
     address_line3 = models.CharField(max_length=120, blank=True)
     city = models.CharField(max_length=40)
+    state = models.CharField(max_length=40, blank=True, help_text="State/region (optional)")
     postal_code = models.CharField(max_length=16)
     country = models.CharField(max_length=2, help_text="ISO 3166-1 alpha-2, e.g. DE")
 

@@ -115,6 +115,7 @@ def new_shipment(request):
         address_line2=(g("address_line2") or "").strip(),
         address_line3=(g("address_line3") or "").strip(),
         city=(g("city") or "").strip(),
+        state=(g("state") or "").strip(),
         postal_code=(g("postal_code") or "").strip(),
         country=(g("country") or "BG").strip().upper()[:2],
         product=(g("product") or "").strip(),
