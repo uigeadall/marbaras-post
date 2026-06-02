@@ -306,10 +306,10 @@ def _do_finalize(order_ids):
                 failed += 1
             continue
         for s in siblings:
-            ref = f"S{s.pk}"
-            s.awb = str(res["awb_by_ref"].get(ref) or "")
-            if res["barcode_by_ref"].get(ref):
-                s.tracking_number = str(res["barcode_by_ref"][ref])
+            iid = str(s.dpi_item_id)
+            s.awb = str(res.get("awb_by_id", {}).get(iid) or res.get("awb") or "")
+            if res.get("barcode_by_id", {}).get(iid):
+                s.tracking_number = str(res["barcode_by_id"][iid])
             s.status = "label_created"
             s.label_created_at = timezone.now()
             s.notes = ""

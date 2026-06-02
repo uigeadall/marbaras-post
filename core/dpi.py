@@ -153,7 +153,9 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         "shipmentGrossWeight": weight,
         "shipmentNaturetype": getattr(shipment, "content_type", "") or "SALE_GOODS",
         "returnItemWanted": False,
-        "custRef": f"S{shipment.pk}"[:28],
+        # Customer reference: the operator's own (Reference field). Falls back to
+        # an internal Sxx only when left blank, so DHL always has a reference.
+        "custRef": ((getattr(shipment, "reference", "") or "").strip()[:28] or f"S{shipment.pk}"),
         "contents": [
             {
                 "contentPieceAmount": 1,
@@ -268,10 +270,16 @@ def create_order_for_many(shipments, *, finalize: bool) -> Dict[int, Dict[str, A
     by_ref: Dict[str, Any] = {}
     for s in shipments:
         item = build_item(s, finalize=finalize)
-        item["custRef"] = f"S{s.pk}"
+        # Map responses by the custRef we actually send (the operator's
+        # reference). Guarantee it's unique within this batch so the response
+        # maps back to the right shipment even if two share a reference.
+        ref = item["custRef"]
+        if ref in by_ref:
+            ref = f"{ref}-{s.pk}"[:28]
+            item["custRef"] = ref
+        by_ref[ref] = s
         key = (item["product"], item["serviceLevel"])
         groups.setdefault(key, []).append((s, item))
-        by_ref[f"S{s.pk}"] = s
 
     for (product, service), pairs in groups.items():
         items = [it for _, it in pairs]
@@ -338,9 +346,12 @@ def add_items_to_order(order_id: str, shipments) -> Dict[int, Dict[str, Any]]:
     by_ref = {}
     for s in shipments:
         item = build_item(s)
-        item["custRef"] = f"S{s.pk}"
+        ref = item["custRef"]
+        if ref in by_ref:
+            ref = f"{ref}-{s.pk}"[:28]
+            item["custRef"] = ref
         items.append(item)
-        by_ref[f"S{s.pk}"] = s
+        by_ref[ref] = s
 
     # The add-items endpoint takes a JSON array of items. Product fallback in
     # case the resolved product is rejected for a destination.
@@ -411,12 +422,17 @@ def finalize_order(order_id: str) -> Dict[str, Any]:
     if r.status_code not in (200, 201):
         return {"ok": False, "status_code": r.status_code, "error": (r.text or "")[:300]}
     body = r.json() or {}
-    awb_by_ref, barcode_by_ref = {}, {}
-    for sh in body.get("shipments") or []:
+    shipments = body.get("shipments") or []
+    # Map by DHL item id (stable, set at create) rather than custRef, so the
+    # operator's free-text reference can't affect result mapping.
+    fallback_awb = shipments[0].get("awb") if shipments else None
+    awb_by_id, barcode_by_id = {}, {}
+    for sh in shipments:
         for it in sh.get("items") or []:
-            awb_by_ref[it.get("custRef")] = sh.get("awb")
-            barcode_by_ref[it.get("custRef")] = it.get("barcode")
-    return {"ok": True, "awb_by_ref": awb_by_ref, "barcode_by_ref": barcode_by_ref}
+            iid = str(it.get("id"))
+            awb_by_id[iid] = sh.get("awb")
+            barcode_by_id[iid] = it.get("barcode")
+    return {"ok": True, "awb": fallback_awb, "awb_by_id": awb_by_id, "barcode_by_id": barcode_by_id}
 
 
 def delete_item(item_id: str) -> Dict[str, Any]:
