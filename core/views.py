@@ -100,12 +100,17 @@ def new_shipment(request):
     if not name:
         messages.error(request, "Името е задължително.")
         return redirect("dashboard")
+    phone = (g("recipient_phone") or "").strip()
+    email = (g("recipient_email") or "").strip()
+    if not phone and not email:
+        messages.error(request, "Въведи телефон ИЛИ имейл на получателя (поне едното е задължително).")
+        return redirect("dashboard")
     s = Shipment.objects.create(
         owner=request.user,
         reference=(g("reference") or "").strip(),
         recipient_name=name,
-        recipient_email=(g("recipient_email") or "").strip(),
-        recipient_phone=(g("recipient_phone") or "").strip(),
+        recipient_email=email,
+        recipient_phone=phone,
         address_line1=(g("address_line1") or "").strip(),
         address_line2=(g("address_line2") or "").strip(),
         address_line3=(g("address_line3") or "").strip(),

@@ -42,7 +42,7 @@
 
     <div class="app-grid a1">
       <!-- ФОРМА ЗА СЪЗДАВАНЕ -->
-      <form class="paste-card a1-form" method="post" action="{% url 'new_shipment' %}">
+      <form class="paste-card a1-form" method="post" action="{% url 'new_shipment' %}" onsubmit="return checkContact()">
         {% csrf_token %}
         <div class="gen-box">
           <div class="ff2">
@@ -59,7 +59,7 @@
           </div>
         </div>
         <textarea id="paste-box" rows="4" placeholder="📋 Постави целия адрес тук — ще попълним полетата отдолу"></textarea>
-        <div class="ff"><label>Имейл</label><input type="email" name="recipient_email" id="f_email"></div>
+        <div class="ff"><label>Имейл <span class="req">*</span> <span class="muted small">(или телефон)</span></label><input type="email" name="recipient_email" id="f_email"></div>
         <div class="ff"><label>Име <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
         <div class="ff"><label>Адрес (ред 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
         <div class="ff"><label>Адрес (ред 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
@@ -75,7 +75,7 @@
           </select>
         </div>
         <div class="ff2">
-          <div class="ff"><label>Телефон</label><input type="text" name="recipient_phone" id="f_phone"></div>
+          <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
           <div class="ff"><label>Референция</label><input type="text" name="reference"></div>
         </div>
         <div class="ff"><label>Съдържание <span class="req">*</span></label><input type="text" name="description" value="Стоки" required></div>
@@ -225,6 +225,18 @@
   document.addEventListener('change', e=>{ if(e.target.classList.contains('rowchk')||e.target.id==='chk-all') refreshCount(); });
   refreshCount();
 })();
+
+// Phone OR email is required (DHL needs at least one).
+function checkContact(){
+  var phone = (document.getElementById('f_phone')||{}).value || '';
+  var email = (document.getElementById('f_email')||{}).value || '';
+  if(!phone.trim() && !email.trim()){
+    alert('Въведи телефон ИЛИ имейл на получателя — поне едното е задължително.');
+    (document.getElementById('f_phone')||{}).focus && document.getElementById('f_phone').focus();
+    return false;
+  }
+  return true;
+}
 
 // "Изпрати" създава РЕАЛНИ платими етикети — потвърждение и проверка за избор.
 function confirmDispatch(){
