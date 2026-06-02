@@ -58,7 +58,7 @@
             </div>
           </div>
         </div>
-        <textarea id="paste-box" rows="4" placeholder="📋 Постави целия адрес тук — ще попълним полетата отдолу"></textarea>
+        <textarea id="paste-box" rows="4" autofocus placeholder="📋 Постави целия адрес тук — ще попълним полетата отдолу"></textarea>
         <div class="ff"><label>Имейл <span class="req">*</span> <span class="muted small">(или телефон)</span></label><input type="email" name="recipient_email" id="f_email"></div>
         <div class="ff"><label>Име <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
         <div class="ff"><label>Адрес (ред 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
@@ -78,14 +78,29 @@
           <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
           <div class="ff"><label>Референция</label><input type="text" name="reference"></div>
         </div>
-        <div class="ff"><label>Съдържание <span class="req">*</span></label><input type="text" name="description" value="Стоки" required></div>
+        <div class="ff"><label>Съдържание <span class="req">*</span></label>
+          <input type="text" name="description" list="content-list" value="Стоки" required>
+          <datalist id="content-list">
+            <option value="Silver ring"><option value="Silver earrings"><option value="Silver pendant">
+            <option value="Silver bracelet"><option value="Silver necklace"><option value="Silver jewellery">
+          </datalist>
+        </div>
         <div class="ff2">
           <div class="ff"><label>Стойност</label><input type="number" step="0.01" name="value" placeholder="29.90"></div>
           <div class="ff"><label>Валута</label>
             <select name="currency"><option>EUR</option><option>BGN</option><option>CHF</option><option>GBP</option><option>USD</option></select>
           </div>
         </div>
-        <div class="ff"><label>Тегло (г)</label><input type="number" name="weight_g" min="1" placeholder="250"></div>
+        <div class="ff"><label>Тегло (г)</label>
+          <input type="number" name="weight_g" id="f_weight" min="1" placeholder="250">
+          <div class="presets">
+            <button type="button" onclick="setWeight(15)">15г</button>
+            <button type="button" onclick="setWeight(30)">30г</button>
+            <button type="button" onclick="setWeight(50)">50г</button>
+            <button type="button" onclick="setWeight(100)">100г</button>
+            <button type="button" onclick="setWeight(250)">250г</button>
+          </div>
+        </div>
 
         <!-- Митница — задължителна за дестинации извън ЕС -->
         <div id="customs-box" class="customs-box" hidden>
@@ -224,7 +239,28 @@
   }
   document.addEventListener('change', e=>{ if(e.target.classList.contains('rowchk')||e.target.id==='chk-all') refreshCount(); });
   refreshCount();
+
+  // Запомняй стойностите: помни последно използваните полета за пакета
+  // (тегло/стойност/съдържание/валута/продукт/услуга/митница) в браузъра.
+  const REMEMBER = ['product','service_level','description','value','currency','weight_g','content_type','hs_code','origin_country'];
+  const form = document.querySelector('.a1-form');
+  if(form){
+    REMEMBER.forEach(n=>{
+      const el = form.querySelector('[name="'+n+'"]');
+      const saved = localStorage.getItem('mpost_'+n);
+      if(el && saved!==null && saved!=='') el.value = saved;
+    });
+    form.addEventListener('submit', ()=>{
+      REMEMBER.forEach(n=>{
+        const el = form.querySelector('[name="'+n+'"]');
+        if(el) localStorage.setItem('mpost_'+n, el.value);
+      });
+    });
+  }
 })();
+
+// Бутони за бързо тегло.
+function setWeight(g){ var e=document.getElementById('f_weight'); if(e){ e.value=g; e.focus(); } }
 
 // Phone OR email is required (DHL needs at least one).
 function checkContact(){

@@ -266,6 +266,9 @@ img { max-width: 100%; }
 .ff2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 .req { color: var(--accent); }
 .gen-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: .9rem; margin-bottom: .2rem; }
+.presets { display: flex; gap: .35rem; margin-top: .4rem; flex-wrap: wrap; }
+.presets button { padding: .3rem .6rem; border: 1.5px solid var(--line); background: #fff; border-radius: 8px; font-weight: 700; font-size: .8rem; cursor: pointer; color: var(--ink-2); }
+.presets button:hover { border-color: var(--primary); color: var(--primary); }
 .customs-box { background: #fff8f0; border: 1px solid #fed7aa; border-radius: 12px; padding: .9rem; display: flex; flex-direction: column; gap: .55rem; }
 .customs-title { font-weight: 800; color: #b45309; }
 @media (max-width: 980px){ .app-grid.a1 { grid-template-columns: 1fr; } }
