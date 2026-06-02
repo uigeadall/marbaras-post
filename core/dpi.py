@@ -158,7 +158,7 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         "custRef": ((getattr(shipment, "reference", "") or "").strip()[:28] or f"S{shipment.pk}"),
         "contents": [
             {
-                "contentPieceAmount": 1,
+                "contentPieceAmount": max(int(getattr(shipment, "quantity", 1) or 1), 1),
                 "contentPieceDescription": desc,
                 "contentPieceHsCode": (getattr(shipment, "hs_code", "") or _cfg("GLOBAL_MAIL_HS_CODE", "711311")),
                 "contentPieceOrigin": (getattr(shipment, "origin_country", "") or _cfg("SHOP_COUNTRY", "BG")),

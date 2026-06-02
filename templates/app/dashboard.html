@@ -78,20 +78,7 @@
           <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
           <div class="ff"><label>Референция <span class="muted small">(твой номер — отива в DHL)</span></label><input type="text" name="reference" placeholder="напр. Amazon #028-..."></div>
         </div>
-        <div class="ff"><label>Съдържание <span class="req">*</span></label>
-          <input type="text" name="description" list="content-list" value="Стоки" required>
-          <datalist id="content-list">
-            <option value="Silver ring"><option value="Silver earrings"><option value="Silver pendant">
-            <option value="Silver bracelet"><option value="Silver necklace"><option value="Silver jewellery">
-          </datalist>
-        </div>
-        <div class="ff2">
-          <div class="ff"><label>Стойност</label><input type="number" step="0.01" name="value" placeholder="29.90"></div>
-          <div class="ff"><label>Валута</label>
-            <select name="currency"><option>EUR</option><option>BGN</option><option>CHF</option><option>GBP</option><option>USD</option></select>
-          </div>
-        </div>
-        <div class="ff"><label>Тегло (г)</label>
+        <div class="ff"><label>Тегло (г) <span class="req">*</span></label>
           <input type="number" name="weight_g" id="f_weight" min="1" placeholder="250">
           <div class="presets">
             <button type="button" onclick="setWeight(15)">15г</button>
@@ -105,10 +92,26 @@
         <!-- Митница — задължителна за дестинации извън ЕС -->
         <div id="customs-box" class="customs-box" hidden>
           <div class="customs-title">🌍 Митница <span class="muted small">(задължителна извън ЕС)</span></div>
-          <div class="ff"><label>Тип съдържание</label>
-            <select name="content_type">
-              {% for code, label in content_types %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
-            </select>
+          <div class="ff"><label>Описание (какъв е предметът) <span class="req">*</span></label>
+            <input type="text" name="description" list="content-list" value="Стоки">
+            <datalist id="content-list">
+              <option value="Silver ring"><option value="Silver earrings"><option value="Silver pendant">
+              <option value="Silver bracelet"><option value="Silver necklace"><option value="Silver jewellery">
+            </datalist>
+          </div>
+          <div class="ff2">
+            <div class="ff"><label>Количество</label><input type="number" name="quantity" min="1" value="1"></div>
+            <div class="ff"><label>Цена на продукта</label><input type="number" step="0.01" name="value" placeholder="29.90"></div>
+          </div>
+          <div class="ff2">
+            <div class="ff"><label>Валута</label>
+              <select name="currency"><option>EUR</option><option>BGN</option><option>CHF</option><option>GBP</option><option>USD</option></select>
+            </div>
+            <div class="ff"><label>Тип съдържание</label>
+              <select name="content_type">
+                {% for code, label in content_types %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+              </select>
+            </div>
           </div>
           <div class="ff2">
             <div class="ff"><label>HS тарифен номер</label><input type="text" name="hs_code" value="711311"></div>
@@ -242,7 +245,7 @@
 
   // Запомняй стойностите: помни последно използваните полета за пакета
   // (тегло/стойност/съдържание/валута/продукт/услуга/митница) в браузъра.
-  const REMEMBER = ['product','service_level','description','value','currency','weight_g','content_type','hs_code','origin_country'];
+  const REMEMBER = ['product','service_level','description','value','currency','weight_g','quantity','content_type','hs_code','origin_country'];
   const form = document.querySelector('.a1-form');
   if(form){
     REMEMBER.forEach(n=>{

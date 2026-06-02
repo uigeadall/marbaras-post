@@ -120,6 +120,7 @@ def new_shipment(request):
         product=(g("product") or "").strip(),
         service_level=(g("service_level") or "PRIORITY").strip(),
         description=(g("description") or "Goods").strip(),
+        quantity=int(g("quantity")) if (g("quantity") or "").isdigit() else 1,
         weight_g=int(g("weight_g")) if (g("weight_g") or "").isdigit() else 100,
         value=_dec(g("value"), "1") if g("value") else Decimal("1"),
         currency=(g("currency") or "EUR").upper()[:3],
