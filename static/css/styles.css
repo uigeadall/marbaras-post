@@ -400,3 +400,12 @@ img { max-width: 100%; }
 .awb-banner a { color:#1a1a1a; text-decoration:underline; margin-left:auto; font-weight:700; }
 .ship-table td a { color:#1a1a1a; text-decoration:underline; }
 .ship-table td a:hover { color:#000; }
+
+/* Tighter operator form — less scrolling */
+.a1-form { gap: .35rem; }
+.a1-form .ff label { margin-bottom: 1px; }
+.a1-form #paste-box { margin-bottom: .25rem; rows: 3; }
+.gen-box { padding: .55rem; margin-bottom: .15rem; }
+.customs-box { padding: .7rem; gap: .4rem; }
+.presets { margin-top: .25rem; gap: .25rem; }
+.presets button { padding: .22rem .5rem; font-size: .75rem; }

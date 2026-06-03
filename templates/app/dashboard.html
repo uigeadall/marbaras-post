@@ -59,45 +59,50 @@
           </div>
         </div>
         <textarea id="paste-box" rows="4" autofocus placeholder="📋 Paste the whole address here — we'll fill the fields below"></textarea>
-        <!-- 1: Country -->
-        <div class="ff"><label>Country <span class="req">*</span></label>
-          <select name="country" id="f_country" required>
-            <option value="">— Select country —</option>
-            {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
-          </select>
-        </div>
-        <!-- 2: Weight -->
-        <div class="ff"><label>Parcel weight <span class="muted small">(envelope + product) (g)</span> <span class="req">*</span></label>
-          <input type="number" name="weight_g" id="f_weight" min="1" placeholder="250">
-          <div class="presets">
-            <button type="button" onclick="setWeight(15)">15g</button>
-            <button type="button" onclick="setWeight(30)">30g</button>
-            <button type="button" onclick="setWeight(50)">50g</button>
-            <button type="button" onclick="setWeight(100)">100g</button>
-            <button type="button" onclick="setWeight(250)">250g</button>
+        <!-- Country + Weight -->
+        <div class="ff2">
+          <div class="ff"><label>Country <span class="req">*</span></label>
+            <select name="country" id="f_country" required>
+              <option value="">— Select —</option>
+              {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
+            </select>
+          </div>
+          <div class="ff"><label>Weight <span class="muted small">(parcel, g)</span> <span class="req">*</span></label>
+            <input type="number" name="weight_g" id="f_weight" min="1" placeholder="250">
+            <div class="presets">
+              <button type="button" onclick="setWeight(15)">15</button>
+              <button type="button" onclick="setWeight(30)">30</button>
+              <button type="button" onclick="setWeight(50)">50</button>
+              <button type="button" onclick="setWeight(100)">100</button>
+              <button type="button" onclick="setWeight(250)">250</button>
+            </div>
           </div>
         </div>
-        <!-- 3: Reference -->
-        <div class="ff"><label>Reference <span class="muted small">(your number — goes to DHL)</span></label><input type="text" name="reference" placeholder="e.g. Amazon #028-..."></div>
-        <!-- 4: Importer customs reference -->
-        <div class="ff"><label>Importer customs reference <span class="muted small">(optional — e.g. Etsy UK VAT / EORI; prints on the label if filled)</span></label>
-          <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  or  EORI: ...">
+        <!-- Reference + Importer customs ref -->
+        <div class="ff2">
+          <div class="ff"><label>Reference <span class="muted small">(your no.)</span></label><input type="text" name="reference" placeholder="e.g. Amazon #028-..."></div>
+          <div class="ff"><label>Importer customs ref <span class="muted small">(opt.)</span></label><input type="text" name="importer_tax_id" placeholder="ETSY UK VAT / EORI"></div>
         </div>
-        <!-- 5: Name -->
+        <!-- Name -->
         <div class="ff"><label>Name <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
-        <!-- 6: Email -->
-        <div class="ff"><label>Email <span class="req">*</span> <span class="muted small">(or phone)</span></label><input type="email" name="recipient_email" id="f_email"></div>
-        <!-- 7: Phone -->
-        <div class="ff"><label>Phone <span class="req">*</span> <span class="muted small">(or email)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
-        <!-- 8/9/10: Address -->
+        <!-- Email + Phone -->
+        <div class="ff2">
+          <div class="ff"><label>Email <span class="muted small">(or phone)</span></label><input type="email" name="recipient_email" id="f_email"></div>
+          <div class="ff"><label>Phone <span class="muted small">(or email)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
+        </div>
+        <!-- Address 1 -->
         <div class="ff"><label>Address (line 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
-        <div class="ff"><label>Address (line 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
-        <div class="ff"><label>Address (line 3)</label><input type="text" name="address_line3" id="f_addr3"></div>
-        <!-- 11: Postal code -->
-        <div class="ff"><label>Postal code <span class="req">*</span></label><input type="text" name="postal_code" id="f_postal" required></div>
-        <!-- 12: City -->
-        <div class="ff"><label>City <span class="req">*</span></label><input type="text" name="city" id="f_city" required></div>
-        <!-- 13: State -->
+        <!-- Address 2 + 3 -->
+        <div class="ff2">
+          <div class="ff"><label>Address (line 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
+          <div class="ff"><label>Address (line 3)</label><input type="text" name="address_line3" id="f_addr3"></div>
+        </div>
+        <!-- Postal + City -->
+        <div class="ff2">
+          <div class="ff"><label>Postal code <span class="req">*</span></label><input type="text" name="postal_code" id="f_postal" required></div>
+          <div class="ff"><label>City <span class="req">*</span></label><input type="text" name="city" id="f_city" required></div>
+        </div>
+        <!-- State -->
         <div class="ff"><label>State / region <span class="muted small">(optional)</span></label><input type="text" name="state" id="f_state"></div>
 
         <!-- Customs — required for non-EU destinations -->
