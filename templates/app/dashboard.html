@@ -1,38 +1,38 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Табло — {{ BRAND.name }}{% endblock %}
+{% block title %}Dashboard — {{ BRAND.name }}{% endblock %}
 
 {% block content %}
 <section class="section app">
   <div class="container">
     <div class="app-head">
       <div>
-        <span class="kicker">Оператор · {{ user.username }}</span>
-        <h1 class="section-title" style="text-align:left;margin-top:.4rem;">Нова пратка</h1>
+        <span class="kicker">Operator · {{ user.username }}</span>
+        <h1 class="section-title" style="text-align:left;margin-top:.4rem;">New shipment</h1>
       </div>
-      <div class="app-user"><a href="/admin/">Админ</a> · <a href="{% url 'logout' %}">Изход</a></div>
+      <div class="app-user"><a href="/admin/">Admin</a> · <a href="{% url 'logout' %}">Log out</a></div>
     </div>
 
-    <!-- операторска навигация (стил a1post) -->
+    <!-- operator nav (a1post style) -->
     <nav class="op-nav">
-      <a href="{% url 'new_shipment' %}" class="active">Нова пратка (с тракинг)</a>
-      <a href="#" title="Очаквайте скоро">Нова (без тракинг)</a>
-      <a href="#" title="Очаквайте скоро">Експресна</a>
-      <a href="#" title="Очаквайте скоро">Калкулатор</a>
-      <a href="#" title="Очаквайте скоро">Етикет за връщане</a>
-      <a href="#" title="Очаквайте скоро">Фактури</a>
+      <a href="{% url 'new_shipment' %}" class="active">New shipment (tracked)</a>
+      <a href="#" title="Coming soon">New (untracked)</a>
+      <a href="#" title="Coming soon">Express</a>
+      <a href="#" title="Coming soon">Calculator</a>
+      <a href="#" title="Coming soon">Return label</a>
+      <a href="#" title="Coming soon">Invoices</a>
       <span class="op-sep"></span>
-      <b>Пратки:</b>
-      <a href="?status=draft">Неизпратени</a>
-      <a href="?status=all">Всички</a>
-      <a href="#" title="Очаквайте скоро">Изтрити</a>
-      <a href="#" title="Очаквайте скоро">Върнати</a>
-      <a href="#" title="Очаквайте скоро">Статистика</a>
+      <b>Shipments:</b>
+      <a href="?status=draft">Unsent</a>
+      <a href="?status=all">All</a>
+      <a href="#" title="Coming soon">Deleted</a>
+      <a href="#" title="Coming soon">Returned</a>
+      <a href="#" title="Coming soon">Statistics</a>
     </nav>
 
     <div class="op-import">
-      <span class="muted small">Импорт:</span>
+      <span class="muted small">Import:</span>
       {% for n in INTEGRATIONS %}<span class="logo-chip sm">{{ n }}</span>{% endfor %}
     </div>
 
@@ -41,95 +41,95 @@
     {% endif %}
 
     <div class="app-grid a1">
-      <!-- ФОРМА ЗА СЪЗДАВАНЕ -->
+      <!-- CREATE FORM -->
       <form class="paste-card a1-form" method="post" action="{% url 'new_shipment' %}" onsubmit="return checkContact()">
         {% csrf_token %}
         <div class="gen-box">
           <div class="ff2">
-            <div class="ff"><label>Продукт <span class="req">*</span></label>
+            <div class="ff"><label>Product <span class="req">*</span></label>
               <select name="product">
                 {% for code, label in products %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
               </select>
             </div>
-            <div class="ff"><label>Ниво на услуга <span class="req">*</span></label>
+            <div class="ff"><label>Service level <span class="req">*</span></label>
               <select name="service_level">
                 {% for code, label in service_levels %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
               </select>
             </div>
           </div>
         </div>
-        <textarea id="paste-box" rows="4" autofocus placeholder="📋 Постави целия адрес тук — ще попълним полетата отдолу"></textarea>
-        <!-- 1: Държава -->
-        <div class="ff"><label>Държава <span class="req">*</span></label>
+        <textarea id="paste-box" rows="4" autofocus placeholder="📋 Paste the whole address here — we'll fill the fields below"></textarea>
+        <!-- 1: Country -->
+        <div class="ff"><label>Country <span class="req">*</span></label>
           <select name="country" id="f_country" required>
-            <option value="">— Избери държава —</option>
+            <option value="">— Select country —</option>
             {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
           </select>
         </div>
-        <!-- 2: Тегло -->
-        <div class="ff"><label>Тегло на пратката <span class="muted small">(плик + продукт) (г)</span> <span class="req">*</span></label>
+        <!-- 2: Weight -->
+        <div class="ff"><label>Parcel weight <span class="muted small">(envelope + product) (g)</span> <span class="req">*</span></label>
           <input type="number" name="weight_g" id="f_weight" min="1" placeholder="250">
           <div class="presets">
-            <button type="button" onclick="setWeight(15)">15г</button>
-            <button type="button" onclick="setWeight(30)">30г</button>
-            <button type="button" onclick="setWeight(50)">50г</button>
-            <button type="button" onclick="setWeight(100)">100г</button>
-            <button type="button" onclick="setWeight(250)">250г</button>
+            <button type="button" onclick="setWeight(15)">15g</button>
+            <button type="button" onclick="setWeight(30)">30g</button>
+            <button type="button" onclick="setWeight(50)">50g</button>
+            <button type="button" onclick="setWeight(100)">100g</button>
+            <button type="button" onclick="setWeight(250)">250g</button>
           </div>
         </div>
-        <!-- 3: Референция -->
-        <div class="ff"><label>Референция <span class="muted small">(твой номер — отива в DHL)</span></label><input type="text" name="reference" placeholder="напр. Amazon #028-..."></div>
+        <!-- 3: Reference -->
+        <div class="ff"><label>Reference <span class="muted small">(your number — goes to DHL)</span></label><input type="text" name="reference" placeholder="e.g. Amazon #028-..."></div>
         <!-- 4: Importer customs reference -->
-        <div class="ff"><label>Importer customs reference <span class="muted small">(по избор — напр. Etsy UK ДДС / EORI; ако го попълниш, излиза на етикета)</span></label>
-          <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  или  EORI: ...">
+        <div class="ff"><label>Importer customs reference <span class="muted small">(optional — e.g. Etsy UK VAT / EORI; prints on the label if filled)</span></label>
+          <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  or  EORI: ...">
         </div>
-        <!-- 5: Име -->
-        <div class="ff"><label>Име <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
-        <!-- 6: Имейл -->
-        <div class="ff"><label>Имейл <span class="req">*</span> <span class="muted small">(или телефон)</span></label><input type="email" name="recipient_email" id="f_email"></div>
-        <!-- 7: Телефон -->
-        <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
-        <!-- 8/9/10: Адрес -->
-        <div class="ff"><label>Адрес (ред 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
-        <div class="ff"><label>Адрес (ред 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
-        <div class="ff"><label>Адрес (ред 3)</label><input type="text" name="address_line3" id="f_addr3"></div>
-        <!-- 11: Пощенски код -->
-        <div class="ff"><label>Пощенски код <span class="req">*</span></label><input type="text" name="postal_code" id="f_postal" required></div>
-        <!-- 12: Град -->
-        <div class="ff"><label>Град <span class="req">*</span></label><input type="text" name="city" id="f_city" required></div>
-        <!-- 13: Регион -->
-        <div class="ff"><label>State / регион <span class="muted small">(по избор)</span></label><input type="text" name="state" id="f_state"></div>
+        <!-- 5: Name -->
+        <div class="ff"><label>Name <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
+        <!-- 6: Email -->
+        <div class="ff"><label>Email <span class="req">*</span> <span class="muted small">(or phone)</span></label><input type="email" name="recipient_email" id="f_email"></div>
+        <!-- 7: Phone -->
+        <div class="ff"><label>Phone <span class="req">*</span> <span class="muted small">(or email)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
+        <!-- 8/9/10: Address -->
+        <div class="ff"><label>Address (line 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
+        <div class="ff"><label>Address (line 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
+        <div class="ff"><label>Address (line 3)</label><input type="text" name="address_line3" id="f_addr3"></div>
+        <!-- 11: Postal code -->
+        <div class="ff"><label>Postal code <span class="req">*</span></label><input type="text" name="postal_code" id="f_postal" required></div>
+        <!-- 12: City -->
+        <div class="ff"><label>City <span class="req">*</span></label><input type="text" name="city" id="f_city" required></div>
+        <!-- 13: State -->
+        <div class="ff"><label>State / region <span class="muted small">(optional)</span></label><input type="text" name="state" id="f_state"></div>
 
-        <!-- Митница — задължителна за дестинации извън ЕС -->
+        <!-- Customs — required for non-EU destinations -->
         <div id="customs-box" class="customs-box" hidden>
-          <div class="customs-title">🌍 Митница <span class="muted small">(задължителна извън ЕС)</span></div>
-          <label class="cp-head">Продукти <span class="muted small">(добави няколко при нужда)</span></label>
-          <div class="cp-cols"><span>Описание (какъв е предметът)</span><span>Кол.</span><span>Тегло г</span><span>Цена</span><span></span></div>
+          <div class="customs-title">🌍 Customs <span class="muted small">(required outside the EU)</span></div>
+          <label class="cp-head">Products <span class="muted small">(add more if needed)</span></label>
+          <div class="cp-cols"><span>Description (what is the item)</span><span>Qty</span><span>Weight g</span><span>Value</span><span></span></div>
           <div id="cp-rows">
             <div class="cp-row">
-              <input type="text" name="cp_description" list="content-list" value="Стоки" placeholder="напр. Silver ring">
+              <input type="text" name="cp_description" list="content-list" value="Goods" placeholder="e.g. Silver ring">
               <input type="number" name="cp_quantity" min="1" value="1">
               <input type="number" name="cp_netweight" min="1" placeholder="5">
               <input type="number" step="0.01" name="cp_value" placeholder="29.90">
-              <button type="button" class="cp-del" title="Премахни" onclick="delCpRow(this)">✕</button>
+              <button type="button" class="cp-del" title="Remove" onclick="delCpRow(this)">✕</button>
             </div>
           </div>
           <datalist id="content-list">
             <option value="Silver ring"><option value="Silver earrings"><option value="Silver pendant">
             <option value="Silver bracelet"><option value="Silver necklace"><option value="Silver jewellery">
           </datalist>
-          <button type="button" class="btn-mini" style="margin:.2rem 0 .6rem;" onclick="addCpRow()">＋ Добави продукт</button>
-          <div class="ff"><label>Валута</label>
+          <button type="button" class="btn-mini" style="margin:.2rem 0 .6rem;" onclick="addCpRow()">＋ Add product</button>
+          <div class="ff"><label>Currency</label>
             <select name="currency"><option>EUR</option><option>BGN</option><option>CHF</option><option>GBP</option><option>USD</option></select>
           </div>
-          <div class="ff"><label>Тип съдържание</label>
+          <div class="ff"><label>Content type</label>
             <select name="content_type">
               {% for code, label in content_types %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
             </select>
           </div>
           <div class="ff2">
-            <div class="ff"><label>HS тарифен номер</label><input type="text" name="hs_code" value="711311"></div>
-            <div class="ff"><label>Държава на произход</label>
+            <div class="ff"><label>HS tariff number</label><input type="text" name="hs_code" value="711311"></div>
+            <div class="ff"><label>Country of origin</label>
               <select name="origin_country">
                 {% for code, cname in countries %}<option value="{{ code }}" {% if code == 'BG' %}selected{% endif %}>{{ cname }} ({{ code }})</option>{% endfor %}
               </select>
@@ -137,47 +137,47 @@
           </div>
         </div>
 
-        <button class="btn btn-primary btn-lg" type="submit" style="width:100%;justify-content:center;">➕ Добави в списъка</button>
-        <p class="muted small" style="margin-top:.5rem;">Добавя я в <b>Неизпратени</b> (нищо не отива в DHL). Маркирай пратките вдясно → <b>🚀 Изпрати</b>, за да създадеш етикетите. Телефон/имейл са нужни извън ЕС.</p>
+        <button class="btn btn-primary btn-lg" type="submit" style="width:100%;justify-content:center;">➕ Add to list</button>
+        <p class="muted small" style="margin-top:.5rem;">Adds it to <b>Unsent</b> (nothing goes to DHL). Tick the shipments on the right → <b>🚀 Dispatch</b> to create the labels. Phone/email required outside the EU.</p>
       </form>
 
-      <!-- СПИСЪК С ПРАТКИ -->
+      <!-- SHIPMENTS LIST -->
       <div class="ship-card" id="unsent">
-        <!-- табове по статус -->
+        <!-- status tabs -->
         <div class="tabs">
-          <a href="?status=active" class="{% if current_status == 'active' and not awb_filter %}on{% endif %}">Активни <span>{{ counts.active }}</span></a>
-          <a href="?status=draft" class="{% if current_status == 'draft' and not awb_filter %}on{% endif %}">Неизпратени <span>{{ counts.draft }}</span></a>
-          <a href="?status=prepared" class="{% if current_status == 'prepared' and not awb_filter %}on{% endif %}">Подготвят се <span>{{ counts.prepared }}</span></a>
-          <a href="?status=label_created" class="{% if current_status == 'label_created' and not awb_filter %}on{% endif %}">Приключени <span>{{ counts.label_created }}</span></a>
-          <a href="?status=all" class="{% if current_status == 'all' and not awb_filter %}on{% endif %}">Всички <span>{{ counts.all }}</span></a>
+          <a href="?status=active" class="{% if current_status == 'active' and not awb_filter %}on{% endif %}">Active <span>{{ counts.active }}</span></a>
+          <a href="?status=draft" class="{% if current_status == 'draft' and not awb_filter %}on{% endif %}">Unsent <span>{{ counts.draft }}</span></a>
+          <a href="?status=prepared" class="{% if current_status == 'prepared' and not awb_filter %}on{% endif %}">Preparing <span>{{ counts.prepared }}</span></a>
+          <a href="?status=label_created" class="{% if current_status == 'label_created' and not awb_filter %}on{% endif %}">Completed <span>{{ counts.label_created }}</span></a>
+          <a href="?status=all" class="{% if current_status == 'all' and not awb_filter %}on{% endif %}">All <span>{{ counts.all }}</span></a>
         </div>
         {% if awb_filter %}
-        <div class="awb-banner">📦 Партида (AWB): <b class="mono">{{ awb_filter }}</b> <a href="?status=all">✕ Покажи всички</a></div>
+        <div class="awb-banner">📦 Batch (AWB): <b class="mono">{{ awb_filter }}</b> <a href="?status=all">✕ Show all</a></div>
         {% endif %}
 
-        <!-- основно действие: маркирай и натисни -->
+        <!-- primary action: select rows then click -->
         <div class="action-bar">
-          <span class="sel-hint"><b id="sel-count">0</b> избрани</span>
-          <button form="batch" formaction="{% url 'dispatch' %}" class="btn btn-primary" onclick="return confirmDispatch()">🚀 Изпрати и създай етикети</button>
-          <button form="batch" formaction="{% url 'print_all' %}" formtarget="_blank" class="btn-mini blue">🖨️ Принтирай етикети</button>
-          <button form="batch" formaction="{% url 'combine' %}" class="btn-mini amber">📦 Създай партида</button>
-          <button form="batch" formaction="{% url 'finalize' %}" class="btn-mini green2">✅ Финализирай</button>
-          <button form="batch" formaction="{% url 'print_paperwork' %}" formtarget="_blank" class="btn-mini ink">🧾 Документи</button>
-          <button form="batch" formaction="{% url 'cancel' %}" class="btn-mini red" onclick="return confirm('Да откажа ли избраните в DHL?')">🗑️ Откажи</button>
+          <span class="sel-hint"><b id="sel-count">0</b> selected</span>
+          <button form="batch" formaction="{% url 'dispatch' %}" class="btn btn-primary" onclick="return confirmDispatch()">🚀 Dispatch & create labels</button>
+          <button form="batch" formaction="{% url 'print_all' %}" formtarget="_blank" class="btn-mini blue">🖨️ Print labels</button>
+          <button form="batch" formaction="{% url 'combine' %}" class="btn-mini amber">📦 Create batch</button>
+          <button form="batch" formaction="{% url 'finalize' %}" class="btn-mini green2">✅ Finalize</button>
+          <button form="batch" formaction="{% url 'print_paperwork' %}" formtarget="_blank" class="btn-mini ink">🧾 Paperwork</button>
+          <button form="batch" formaction="{% url 'cancel' %}" class="btn-mini red" onclick="return confirm('Cancel the selected shipments at DHL?')">🗑️ Cancel</button>
         </div>
 
         {% if open_orders %}
         <div class="addbatch-bar">
-          <span class="muted small">➕ Добави избраните чернови към съществуваща партида (същия AWB):</span>
+          <span class="muted small">➕ Add the selected drafts to an existing batch (same AWB):</span>
           <select name="target_order" form="batch">
             {% for o in open_orders %}<option value="{{ o.order_id }}">{{ o.label }}</option>{% endfor %}
           </select>
-          <button form="batch" formaction="{% url 'add_to_batch' %}" class="btn-mini amber" onclick="return confirm('Да добавя ли избраните чернови към тази партида?')">➕ Добави към партидата</button>
+          <button form="batch" formaction="{% url 'add_to_batch' %}" class="btn-mini amber" onclick="return confirm('Add the selected drafts to this batch?')">➕ Add to batch</button>
         </div>
         {% endif %}
         <form method="post" id="batch">{% csrf_token %}
         <table class="ship-table">
-          <thead><tr><th><input type="checkbox" id="chk-all" onclick="document.querySelectorAll('.rowchk').forEach(c=>c.checked=this.checked)"></th><th>#</th><th>Получател</th><th>Дест.</th><th>Статус</th><th>AWB</th><th>Тракинг</th><th></th></tr></thead>
+          <thead><tr><th><input type="checkbox" id="chk-all" onclick="document.querySelectorAll('.rowchk').forEach(c=>c.checked=this.checked)"></th><th>#</th><th>Recipient</th><th>Dest.</th><th>Status</th><th>AWB</th><th>Tracking</th><th></th></tr></thead>
           <tbody>
             {% for s in shipments %}
             <tr>
@@ -186,22 +186,22 @@
               <td>{{ s.recipient_name }}<br><span class="muted small">{{ s.city }}</span></td>
               <td>{{ s.country }}</td>
               <td><span class="st st-{{ s.status }}">{{ s.get_status_display }}</span></td>
-              <td class="mono small">{% if s.awb %}<a href="?awb={{ s.awb }}" title="Покажи само тази партида">{{ s.awb }}</a>{% else %}—{% endif %}</td>
+              <td class="mono small">{% if s.awb %}<a href="?awb={{ s.awb }}" title="Show only this batch">{{ s.awb }}</a>{% else %}—{% endif %}</td>
               <td class="mono small">{{ s.tracking_number|default:"—" }}</td>
               <td class="row-actions">
                 {% if s.dpi_item_id %}
                   {% if s.awb %}
-                    <a class="btn-mini green" href="{% url 'print_label' s.id %}" target="_blank">🖨️ Принт</a>
+                    <a class="btn-mini green" href="{% url 'print_label' s.id %}" target="_blank">🖨️ Print</a>
                   {% else %}
-                    <a class="btn-mini blue" href="{% url 'print_label' s.id %}" target="_blank">👁️ Преглед</a>
+                    <a class="btn-mini blue" href="{% url 'print_label' s.id %}" target="_blank">👁️ Preview</a>
                   {% endif %}
                 {% else %}
-                  <a class="btn-mini ghost" href="{% url 'preview_draft' s.id %}" target="_blank">👁️ Преглед</a>
+                  <a class="btn-mini ghost" href="{% url 'preview_draft' s.id %}" target="_blank">👁️ Preview</a>
                 {% endif %}
               </td>
             </tr>
             {% empty %}
-            <tr><td colspan="8" class="muted center" style="padding:2rem;">Все още няма пратки — попълни формата, за да добавиш.</td></tr>
+            <tr><td colspan="8" class="muted center" style="padding:2rem;">No shipments yet — fill the form to add one.</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -219,11 +219,11 @@
   function updateCustoms(){
     if(!countrySel || !customs) return;
     const c = countrySel.value;
-    customs.hidden = !c || EU.has(c);  // показва се само извън ЕС
+    customs.hidden = !c || EU.has(c);  // shown only outside the EU
   }
   if(countrySel) countrySel.addEventListener('change', updateCustoms);
 
-  // Постави-и-попълни: парсва адресния блок на сървъра и попълва полетата.
+  // Paste-to-fill: parse the address block server-side and fill the fields.
   const box = document.getElementById('paste-box');
   if(box){
     const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -249,7 +249,7 @@
   }
   updateCustoms();
 
-  // Брояч "N избрани" на живо.
+  // Live "N selected" counter.
   const counter = document.getElementById('sel-count');
   function refreshCount(){
     if(counter) counter.textContent = document.querySelectorAll('.rowchk:checked').length;
@@ -257,8 +257,7 @@
   document.addEventListener('change', e=>{ if(e.target.classList.contains('rowchk')||e.target.id==='chk-all') refreshCount(); });
   refreshCount();
 
-  // Запомняй стойностите: помни последно използваните полета за пакета
-  // (тегло/стойност/съдържание/валута/продукт/услуга/митница) в браузъра.
+  // Remember defaults: keep the last-used package fields in the browser.
   const REMEMBER = ['product','service_level','currency','weight_g','content_type','hs_code','origin_country'];
   const form = document.querySelector('.a1-form');
   if(form){
@@ -276,10 +275,10 @@
   }
 })();
 
-// Бутони за бързо тегло.
+// Quick weight buttons.
 function setWeight(g){ var e=document.getElementById('f_weight'); if(e){ e.value=g; e.focus(); } }
 
-// Митница: няколко продукта (1 обица, 1 пръстен, 1 колие…).
+// Customs: multiple products (1 earring, 1 ring, 1 necklace…).
 function addCpRow(){
   var rows=document.getElementById('cp-rows');
   if(!rows) return;
@@ -298,18 +297,18 @@ function checkContact(){
   var phone = (document.getElementById('f_phone')||{}).value || '';
   var email = (document.getElementById('f_email')||{}).value || '';
   if(!phone.trim() && !email.trim()){
-    alert('Въведи телефон ИЛИ имейл на получателя — поне едното е задължително.');
+    alert('Enter a recipient phone OR email — at least one is required.');
     (document.getElementById('f_phone')||{}).focus && document.getElementById('f_phone').focus();
     return false;
   }
   return true;
 }
 
-// "Изпрати" създава РЕАЛНИ платими етикети — потвърждение и проверка за избор.
+// Dispatch creates REAL billable labels — confirm and require a selection.
 function confirmDispatch(){
   const n = document.querySelectorAll('.rowchk:checked').length;
-  if(n === 0){ alert('Първо маркирай пратките, които искаш да изпратиш.'); return false; }
-  return confirm('Да изпратя ли '+n+' пратка(и)? Това създава РЕАЛНИ етикети в DHL на един общ AWB.');
+  if(n === 0){ alert('First tick the shipments you want to dispatch.'); return false; }
+  return confirm('Dispatch '+n+' shipment(s)? This creates REAL labels at DHL on one shared AWB.');
 }
 </script>
 {% endblock %}

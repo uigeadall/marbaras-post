@@ -9,7 +9,7 @@ def get_lang(request):
     if lang in LANGS:
         request.session["lang"] = lang
         return lang
-    return request.session.get("lang", "bg")
+    return request.session.get("lang", "en")
 
 
 def brand_and_i18n(request):

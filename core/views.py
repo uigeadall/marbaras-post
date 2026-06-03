@@ -59,7 +59,7 @@ def dashboard(request):
         open_orders.append({
             "order_id": oid,
             "count": len(group),
-            "label": f"Партида #{oid} · {len(group)} пратки · {sample.city}, {sample.country}",
+            "label": f"Batch #{oid} · {len(group)} parcels · {sample.city}, {sample.country}",
         })
 
     counts = {
@@ -104,12 +104,12 @@ def new_shipment(request):
     g = request.POST.get
     name = (g("recipient_name") or "").strip()
     if not name:
-        messages.error(request, "Името е задължително.")
+        messages.error(request, "Name is required.")
         return redirect("dashboard")
     phone = (g("recipient_phone") or "").strip()
     email = (g("recipient_email") or "").strip()
     if not phone and not email:
-        messages.error(request, "Въведи телефон ИЛИ имейл на получателя (поне едното е задължително).")
+        messages.error(request, "Enter a recipient phone OR email (at least one is required).")
         return redirect("dashboard")
 
     # Customs product lines (cp_* arrays — one row per product).
@@ -160,7 +160,7 @@ def new_shipment(request):
         importer_tax_id=(g("importer_tax_id") or "").strip(),
         contents_json=lines,
     )
-    messages.success(request, f"✅ Пратка #{s.pk} създадена (Неизпратени). Маркирай я → 🚀 Изпрати, за да създадеш етикета.")
+    messages.success(request, f"✅ Shipment #{s.pk} created (Unsent). Select it → 🚀 Dispatch to create the label.")
     return redirect("dashboard")
 
 
@@ -179,7 +179,7 @@ def paste(request):
     if not blocks:
         messages.error(
             request,
-            "Не успях да разчета адрес. Постави го като: име / улица / пощенски код + град / държава (по един на ред).",
+            "Could not read an address. Paste it as: name / street / postal code + city / country (one per line).",
         )
         return redirect("dashboard")
 
@@ -238,7 +238,7 @@ def paste(request):
 def create_label(request, pk):
     s = get_object_or_404(Shipment, pk=pk)
     if s.dpi_item_id:
-        messages.info(request, f"Пратка #{s.pk} вече има етикет.")
+        messages.info(request, f"Shipment #{s.pk} already has a label.")
         return redirect("dashboard")
     res = dpi.create_label(s, finalize=True)
     if res.get("ok"):
@@ -249,12 +249,12 @@ def create_label(request, pk):
         s.status = "label_created"
         s.label_created_at = timezone.now()
         s.save()
-        messages.success(request, f"🖨️ Етикет създаден за #{s.pk} — тракинг {s.tracking_number}.")
+        messages.success(request, f"🖨️ Label created for #{s.pk} — tracking {s.tracking_number}.")
     else:
         s.status = "failed"
         s.notes = f"HTTP {res.get('status_code')}: {res.get('error')}"
         s.save(update_fields=["status", "notes"])
-        messages.error(request, f"#{s.pk} неуспешна: {(res.get('error') or '')[:160]}")
+        messages.error(request, f"#{s.pk} failed: {(res.get('error') or '')[:160]}")
     return redirect("dashboard")
 
 
@@ -359,13 +359,13 @@ def combine(request):
     """Bundle selected drafts into ONE prep order → shared AWB after finalize."""
     sel = _selected(request)
     if not [s for s in sel if not s.dpi_item_id]:
-        messages.error(request, "Избери чернови пратки (без етикет), за да ги групираш.")
+        messages.error(request, "Select draft shipments (without a label) to batch.")
         return redirect("dashboard")
     prepared, failed, _ = _do_combine(sel)
     if prepared:
-        messages.success(request, f"📦 {prepared} пратка(и) изпратени за подготовка. Сега Финализирай за общия AWB + етикети.")
+        messages.success(request, f"📦 {prepared} shipment(s) sent to preparation. Now Finalize for the shared AWB + labels.")
     if failed:
-        messages.error(request, f"{failed} неуспешни — виж бележките.")
+        messages.error(request, f"{failed} failed — see the notes.")
     return redirect("dashboard")
 
 
@@ -375,13 +375,13 @@ def finalize(request):
     """Finalize selected prepared shipments → assign AWB + labels."""
     sel = [s for s in _selected(request) if s.dpi_order_id and not s.awb]
     if not sel:
-        messages.error(request, "Избери подготвени пратки за финализиране.")
+        messages.error(request, "Select prepared shipments to finalize.")
         return redirect("dashboard")
     done, failed = _do_finalize({s.dpi_order_id for s in sel})
     if done:
-        messages.success(request, f"✅ Финализирани {done} пратка(и). Принтирай етикетите отдолу.")
+        messages.success(request, f"✅ Finalized {done} shipment(s). Print the labels below.")
     if failed:
-        messages.error(request, f"{failed} не успяха да се финализират — виж бележките.")
+        messages.error(request, f"{failed} could not be finalized — see the notes.")
     return redirect("dashboard")
 
 
@@ -393,14 +393,14 @@ def add_to_batch(request):
     order_id = (request.POST.get("target_order") or "").strip()
     drafts = [s for s in _selected(request) if not s.dpi_item_id]
     if not order_id:
-        messages.error(request, "Избери към коя партида да добавиш (от падащото меню).")
+        messages.error(request, "Choose which batch to add to (from the dropdown).")
         return redirect("dashboard")
     if not drafts:
-        messages.error(request, "Избери чернови пратки, които да добавиш към партидата.")
+        messages.error(request, "Select draft shipments to add to the batch.")
         return redirect("dashboard")
     # Safety: the target order must still be OPEN (no AWB locally).
     if Shipment.objects.filter(dpi_order_id=order_id).exclude(awb="").exists():
-        messages.error(request, "Тази партида вече е финализирана — не може да се добавя. Финализирай новите като нова партида.")
+        messages.error(request, "This batch is already finalized — cannot add to it. Finalize the new ones as a new batch.")
         return redirect("dashboard")
     res = dpi.add_items_to_order(order_id, drafts)
     added = failed = 0
@@ -411,18 +411,18 @@ def add_to_batch(request):
             s.dpi_item_id = str(r.get("item_id") or "")
             s.tracking_number = str(r.get("barcode") or "")
             s.status = "prepared"
-            s.notes = f"Добавена към партида #{order_id}"
+            s.notes = f"Added to batch #{order_id}"
             s.save()
             added += 1
         else:
             s.status = "failed"
-            s.notes = f"Добавяне неуспешно: {r.get('error')}"
+            s.notes = f"Add failed: {r.get('error')}"
             s.save(update_fields=["status", "notes"])
             failed += 1
     if added:
-        messages.success(request, f"➕ Добавени {added} пратка(и) към партида #{order_id} (същия AWB). Финализирай, когато си готов.")
+        messages.success(request, f"➕ Added {added} shipment(s) to batch #{order_id} (same AWB). Finalize when ready.")
     if failed:
-        messages.error(request, f"{failed} не успяха да се добавят — виж бележките.")
+        messages.error(request, f"{failed} could not be added — see the notes.")
     return redirect("dashboard")
 
 
@@ -434,7 +434,7 @@ def dispatch(request):
     sel = _selected(request)
     drafts = [s for s in sel if not s.dpi_item_id]
     if not drafts:
-        messages.error(request, "Избери чернови пратки за изпращане.")
+        messages.error(request, "Select draft shipments to dispatch.")
         return redirect("dashboard")
     prepared, cfailed, order_ids = _do_combine(drafts)
     done = ffailed = 0
@@ -447,7 +447,7 @@ def dispatch(request):
             f"готови. Маркирай ги и натисни „Принтирай етикети“.",
         )
     if cfailed or ffailed:
-        messages.error(request, f"{cfailed + ffailed} пратка(и) неуспешни — виж бележките им.")
+        messages.error(request, f"{cfailed + ffailed} shipment(s) failed — see their notes.")
     return redirect("dashboard")
 
 
@@ -461,11 +461,11 @@ def print_all(request):
         if s.awb and s.awb not in awbs:
             awbs.append(s.awb)
     if not awbs:
-        messages.error(request, "Избраните пратки още нямат AWB — първо финализирай.")
+        messages.error(request, "The selected shipments have no AWB yet — finalize first.")
         return redirect("dashboard")
     pdfs = [p for p in (dpi.get_item_labels_for_awb(a) for a in awbs) if p]
     if not pdfs:
-        messages.error(request, "Не успях да взема етикетите — виж логовете.")
+        messages.error(request, "Could not fetch the labels — see the logs.")
         return redirect("dashboard")
     if len(pdfs) == 1:
         out = pdfs[0]
@@ -493,7 +493,7 @@ def delete_all_labels(request):
     """
     labelled = list(Shipment.objects.exclude(dpi_item_id=""))
     if not labelled:
-        messages.info(request, "Няма създадени етикети за изтриване.")
+        messages.info(request, "No created labels to delete.")
         return redirect("dashboard")
     cancelled = locked = 0
     for s in labelled:
@@ -526,11 +526,11 @@ def print_paperwork(request):
         if s.awb and s.awb not in awbs:
             awbs.append(s.awb)
     if not awbs:
-        messages.error(request, "Избраните пратки още нямат AWB — първо финализирай.")
+        messages.error(request, "The selected shipments have no AWB yet — finalize first.")
         return redirect("dashboard")
     pdfs = [p for p in (dpi.get_awb_paperwork(a) for a in awbs) if p]
     if not pdfs:
-        messages.error(request, "Не успях да взема документите — виж логовете.")
+        messages.error(request, "Could not fetch the paperwork — see the logs.")
         return redirect("dashboard")
     if len(pdfs) == 1:
         out = pdfs[0]
@@ -553,7 +553,7 @@ def cancel(request):
     """Cancel selected shipments by deleting their DPI item (OPEN only)."""
     sel = [s for s in _selected(request) if s.dpi_item_id]
     if not sel:
-        messages.error(request, "Избери пратки, които са в DHL, за да ги откажеш.")
+        messages.error(request, "Select shipments that are at DHL to cancel.")
         return redirect("dashboard")
     cancelled = locked = failed = 0
     for s in sel:
@@ -570,9 +570,9 @@ def cancel(request):
             s.notes = f"Cancel failed: {res.get('error')}"
             s.save(update_fields=["notes"]); failed += 1
     if cancelled:
-        messages.success(request, f"🗑️ Отказани {cancelled} пратка(и) в DHL.")
+        messages.success(request, f"🗑️ Cancelled {cancelled} shipment(s) at DHL.")
     if locked:
-        messages.warning(request, f"⚠️ {locked} бяха финализирани — маркирани като отказани локално; просто не ги изпращай.")
+        messages.warning(request, f"⚠️ {locked} were finalized — marked cancelled locally; just don't ship them.")
     if failed:
-        messages.error(request, f"{failed} не успяха да се откажат — виж бележките.")
+        messages.error(request, f"{failed} could not be cancelled — see the notes.")
     return redirect("dashboard")

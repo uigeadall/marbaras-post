@@ -164,10 +164,10 @@ INTEGRATIONS = ["Amazon", "Etsy", "eBay", "Shopify", "WooCommerce", "DHL"]
 # valid on the Marbaras account (GPT tracked, GMP untracked). Edit to match your
 # contract — the value is the DPI product/serviceLevel code sent to DHL.
 PRODUCTS = [
-    ("GPT", "С тракинг – Стоки (GPT)"),
-    ("GMM", "Без тракинг – Стоки (GMM)"),
-    ("GMP", "С тракинг – Стоки, Плюс (GMP)"),
+    ("GPT", "Tracked – Goods (GPT)"),
+    ("GMM", "Untracked – Goods (GMM)"),
+    ("GMP", "Tracked – Goods, Plus (GMP)"),
 ]
 SERVICE_LEVELS = [
-    ("PRIORITY", "Приоритет"),
+    ("PRIORITY", "Priority"),
 ]

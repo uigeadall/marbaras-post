@@ -6,12 +6,12 @@ class Shipment(models.Model):
     """One parcel to be labelled and dispatched via DHL / DPI Global Mail."""
 
     STATUS_CHOICES = [
-        ("draft", "Чернова"),
-        ("prepared", "Подготвя се в DHL"),
-        ("label_created", "Етикет създаден"),
-        ("shipped", "Изпратена"),
-        ("cancelled", "Отказана"),
-        ("failed", "Неуспешна"),
+        ("draft", "Draft"),
+        ("prepared", "Preparing at DHL"),
+        ("label_created", "Label created"),
+        ("shipped", "Shipped"),
+        ("cancelled", "Cancelled"),
+        ("failed", "Failed"),
     ]
 
     owner = models.ForeignKey(
@@ -59,12 +59,12 @@ class Shipment(models.Model):
 
     # Customs (required by DHL for non-EU destinations)
     CONTENT_TYPE_CHOICES = [
-        ("SALE_GOODS", "Продажба на стоки"),
-        ("GIFT", "Подарък"),
-        ("COMMERCIAL_SAMPLE", "Търговска мостра"),
-        ("RETURN_GOODS", "Върнати стоки"),
-        ("DOCUMENTS", "Документи"),
-        ("OTHERS", "Друго"),
+        ("SALE_GOODS", "Sale of goods"),
+        ("GIFT", "Gift"),
+        ("COMMERCIAL_SAMPLE", "Commercial sample"),
+        ("RETURN_GOODS", "Returned goods"),
+        ("DOCUMENTS", "Documents"),
+        ("OTHERS", "Other"),
     ]
     content_type = models.CharField(
         max_length=20, choices=CONTENT_TYPE_CHOICES, default="SALE_GOODS"
