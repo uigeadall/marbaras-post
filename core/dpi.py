@@ -234,6 +234,9 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
 
 
 def _order_payload(items: List[Dict], finalize: bool) -> Dict[str, Any]:
+    # Use the first item's customer reference as the job reference so the label
+    # shows the operator's own number instead of an auto MP-/FIN- timestamp.
+    job_ref = (items[0].get("custRef") if items else "") or f"JOB-{int(time.time())}"
     return {
         "customerEkp": str(_cfg("GLOBAL_MAIL_CUSTOMER_EKP")),
         "orderStatus": "FINALIZE" if finalize else "OPEN",
@@ -241,7 +244,7 @@ def _order_payload(items: List[Dict], finalize: bool) -> Dict[str, Any]:
             "contactName": _cfg("BRAND", {}).get("company", "Marbaras Post")[:35]
             if isinstance(_cfg("BRAND", {}), dict)
             else "Marbaras Post",
-            "jobReference": f"MP-{int(time.time())}"[:17],
+            "jobReference": str(job_ref)[:17],
             "telephoneNumber": _cfg("BRAND", {}).get("phone", "+359888000000")
             if isinstance(_cfg("BRAND", {}), dict)
             else "+359888000000",
@@ -461,7 +464,7 @@ def add_items_to_order(order_id: str, shipments) -> Dict[int, Dict[str, Any]]:
     return out
 
 
-def finalize_order(order_id: str) -> Dict[str, Any]:
+def finalize_order(order_id: str, job_ref: str = "") -> Dict[str, Any]:
     """Finalize an OPEN order → assigns AWB + labels. Returns
     ``{ok, awb_by_ref, barcode_by_ref, error}``."""
     token = get_token()
@@ -470,7 +473,7 @@ def finalize_order(order_id: str) -> Dict[str, Any]:
     brand = _cfg("BRAND", {})
     paperwork = {
         "contactName": (brand.get("company") if isinstance(brand, dict) else "Marbaras Post")[:35],
-        "jobReference": f"FIN-{int(time.time())}"[:17],
+        "jobReference": (str(job_ref) or f"JOB-{int(time.time())}")[:17],
         "telephoneNumber": (brand.get("phone") if isinstance(brand, dict) else "+359888000000"),
         "awbCopyCount": 1,
     }

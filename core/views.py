@@ -327,8 +327,11 @@ def _do_finalize(order_ids):
     ``(done, failed)``. Updates every sibling in each order."""
     done = failed = 0
     for oid in order_ids:
-        res = dpi.finalize_order(oid)
         siblings = list(Shipment.objects.filter(dpi_order_id=oid))
+        # Job reference on the label = the operator's own reference.
+        first = siblings[0] if siblings else None
+        job_ref = (first.reference or f"S{first.pk}") if first else ""
+        res = dpi.finalize_order(oid, job_ref=job_ref)
         if not res.get("ok"):
             for s in siblings:
                 s.status = "failed"

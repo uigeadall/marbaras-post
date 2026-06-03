@@ -146,7 +146,7 @@ LOGOUT_REDIRECT_URL = "/"
 BRAND = {
     "name": env("BRAND_NAME", "Marbaras Post"),
     "short": env("BRAND_SHORT", "MPost"),
-    "phone": env("BRAND_PHONE", "0888 00 78 00"),
+    "phone": env("BRAND_PHONE", "00359877888766"),
     "email": env("BRAND_EMAIL", "office@marbaras.com"),
     "company": env("BRAND_COMPANY", "STILKOLOR OOD"),
     "address": env("BRAND_ADDRESS", "bul. Vladislav Varnenchik 281, Varna"),
