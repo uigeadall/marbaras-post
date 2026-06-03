@@ -96,12 +96,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "marbaras_post.wsgi.application"
 
+# Use a persistent Postgres database when DATABASE_URL is set (Railway/Render
+# provide it once you add a Postgres service) so data survives redeploys.
+# Falls back to local SQLite for development.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+_database_url = env("DATABASE_URL", "")
+if _database_url:
+    import dj_database_url
+
+    DATABASES["default"] = dj_database_url.parse(
+        _database_url, conn_max_age=600, ssl_require=False
+    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
