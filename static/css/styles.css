@@ -301,3 +301,87 @@ img { max-width: 100%; }
   .phone, .header-actions .btn-ghost { display: none; }
   .quote-form { flex-direction: column; }
 }
+
+/* ============================================================
+   Operator app — compact monochrome theme (scoped to .app + login)
+   ============================================================ */
+.app { font-size: 13px; padding: 1.4rem 0; }
+.app .section-title { font-size: 1.25rem; }
+.app .kicker, .app .kicker.center { background: #f1f1f2; color: #555; padding: .25rem .55rem; font-size: .68rem; }
+.app .app-user a, .login-form + * a { color: #1a1a1a; text-decoration: underline; }
+
+/* flat cards, thin borders, no shadow */
+.app .paste-card, .app .ship-card,
+.op-nav, .op-import + *, .gen-box, .customs-box, .addbatch-bar, .action-bar {
+  box-shadow: none !important;
+}
+.app .paste-card, .app .ship-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; }
+
+/* operator nav — neutral */
+.op-nav { border: 1px solid #e5e7eb; border-radius: 6px; padding: .55rem .8rem; font-size: .82rem; gap: .25rem .9rem; }
+.op-nav a { color: #1a1a1a; font-weight: 600; }
+.op-nav a.active { color: #000; text-decoration: underline; }
+.op-nav a[title="Очаквайте скоро"] { color: #9aa0a6; font-weight: 500; }
+.op-nav b { color: #555; font-weight: 700; }
+.logo-chip, .logo-chip.sm { background: #f7f7f8; border: 1px solid #e5e7eb; color: #444; font-weight: 600; }
+
+/* form — compact, monochrome */
+.a1-form { gap: .45rem; }
+.gen-box { background: #f7f7f8; border: 1px solid #e5e7eb; padding: .7rem; }
+.a1-form #paste-box { border: 1px solid #c9c9cf; background: #fafafa; border-radius: 6px; padding: .6rem .7rem; }
+.ff label { font-size: .7rem; color: #6b7280; font-weight: 600; }
+.ff input, .ff select, .paste-card textarea { padding: .42rem .6rem; font-size: .88rem; border: 1px solid #d4d4d8; border-radius: 6px; }
+.ff input:focus, .ff select:focus, .paste-card textarea:focus { border-color: #1a1a1a; outline: none; }
+.ff2 { gap: .45rem; }
+.req { color: #1a1a1a; }
+.presets button { background: #fff; border: 1px solid #d4d4d8; color: #333; padding: .25rem .55rem; }
+.presets button:hover { border-color: #1a1a1a; color: #000; }
+.customs-box { background: #f7f7f8; border: 1px solid #e5e7eb; }
+.customs-title { color: #1a1a1a; }
+
+/* buttons — black primary, white/bordered everything else */
+.app .btn-primary { background: #1a1a1a; border-color: #1a1a1a; color: #fff; border-radius: 6px; }
+.app .btn-primary:hover { background: #000; transform: none; }
+.app .btn-mini, .app .btn-mini.blue, .app .btn-mini.green, .app .btn-mini.amber,
+.app .btn-mini.green2, .app .btn-mini.red, .app .btn-mini.ink, .app .btn-mini.ghost {
+  background: #fff; color: #1a1a1a; border: 1px solid #d4d4d8; border-radius: 6px; padding: .4rem .65rem; font-weight: 600;
+}
+.app .btn-mini:hover { border-color: #1a1a1a; color: #000; }
+.app .btn-mini.red:hover { border-color: #1a1a1a; }
+
+/* status tabs */
+.tabs { border-bottom: 1px solid #e5e7eb; gap: .1rem; }
+.tabs a { color: #6b7280; font-size: .82rem; padding: .4rem .7rem; font-weight: 600; }
+.tabs a span { background: #f1f1f2; color: #555; }
+.tabs a.on { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+.tabs a.on span { background: #1a1a1a; color: #fff; }
+
+/* action + add-batch bars */
+.action-bar, .addbatch-bar { background: #f7f7f8; border: 1px solid #e5e7eb; padding: .55rem .7rem; }
+.action-bar .btn-mini { font-size: .8rem; }
+.sel-hint b { color: #1a1a1a; }
+
+/* status badges — monochrome (no color) */
+.st { border-radius: 4px; padding: .15rem .5rem; font-size: .72rem; font-weight: 600; border: 1px solid #e0e0e0; }
+.st-draft { background: #f1f1f2; color: #555; }
+.st-prepared { background: #e6e6e8; color: #333; }
+.st-label_created { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.st-shipped { background: #333; color: #fff; border-color: #333; }
+.st-failed { background: #fff; color: #999; border: 1px dashed #ccc; }
+.st-cancelled { background: #fff; color: #aaa; border: 1px dashed #ddd; }
+
+/* table — compact */
+.ship-table { font-size: .85rem; }
+.ship-table th { font-size: .68rem; padding: .4rem .4rem; border-bottom: 1px solid #e5e7eb; }
+.ship-table td { padding: .45rem .4rem; border-bottom: 1px solid #f0f0f1; }
+.row-actions .btn-mini { padding: .25rem .55rem; font-size: .75rem; }
+
+/* flash — neutral */
+.flash-item { border-radius: 6px; padding: .55rem .8rem; border: 1px solid #e5e7eb; background: #f7f7f8; color: #1a1a1a; font-weight: 500; }
+.flash-item.success { background: #f3f3f3; border-color: #d6d6d6; color: #1a1a1a; }
+.flash-item.error { background: #fff; border: 1px solid #1a1a1a; color: #1a1a1a; }
+.flash-item.warning { background: #f7f7f8; border-color: #cfcfcf; color: #333; }
+
+/* login — neutral */
+.login-card { box-shadow: none; border: 1px solid #e5e7eb; }
+.login-card .btn-primary { background: #1a1a1a; border-color: #1a1a1a; }
