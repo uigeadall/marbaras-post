@@ -39,7 +39,8 @@ def dashboard(request):
         shipments = qs.filter(awb=awb_filter)[:200]
     else:
         tabs = {
-            "active": qs.exclude(status__in=["shipped", "cancelled"]),
+            # Active = work in progress; finalized (label_created) move to Приключени.
+            "active": qs.exclude(status__in=["shipped", "cancelled", "label_created"]),
             "draft": qs.filter(status="draft"),
             "prepared": qs.filter(status="prepared"),
             "label_created": qs.filter(status="label_created"),
@@ -62,7 +63,7 @@ def dashboard(request):
         })
 
     counts = {
-        "active": qs.exclude(status__in=["shipped", "cancelled"]).count(),
+        "active": qs.exclude(status__in=["shipped", "cancelled", "label_created"]).count(),
         "draft": qs.filter(status="draft").count(),
         "prepared": qs.filter(status="prepared").count(),
         "label_created": qs.filter(status="label_created").count(),

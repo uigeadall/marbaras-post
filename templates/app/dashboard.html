@@ -148,7 +148,7 @@
           <a href="?status=active" class="{% if current_status == 'active' and not awb_filter %}on{% endif %}">Активни <span>{{ counts.active }}</span></a>
           <a href="?status=draft" class="{% if current_status == 'draft' and not awb_filter %}on{% endif %}">Неизпратени <span>{{ counts.draft }}</span></a>
           <a href="?status=prepared" class="{% if current_status == 'prepared' and not awb_filter %}on{% endif %}">Подготвят се <span>{{ counts.prepared }}</span></a>
-          <a href="?status=label_created" class="{% if current_status == 'label_created' and not awb_filter %}on{% endif %}">С етикет <span>{{ counts.label_created }}</span></a>
+          <a href="?status=label_created" class="{% if current_status == 'label_created' and not awb_filter %}on{% endif %}">Приключени <span>{{ counts.label_created }}</span></a>
           <a href="?status=all" class="{% if current_status == 'all' and not awb_filter %}on{% endif %}">Всички <span>{{ counts.all }}</span></a>
         </div>
         {% if awb_filter %}
