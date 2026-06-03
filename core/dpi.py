@@ -27,6 +27,13 @@ _BUILTIN_NON_EU_PRODUCT_MAP = {
     "NO": "GPP", "JP": "GPP", "CN": "GPP", "TR": "GPP",
 }
 
+# EU member states — no customs declaration / tax references are needed/printed.
+_EU_COUNTRIES = {
+    "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR",
+    "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK",
+    "SI", "ES", "SE",
+}
+
 
 def _host() -> str:
     test = bool(getattr(settings, "GLOBAL_MAIL_TEST_MODE", True))
@@ -152,8 +159,10 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         "addressLine1": _clean_text(shipment.address_line1, 40) or "Address",
         "addressLine2": _clean_text(shipment.address_line2, 40),
         "addressLine3": _clean_text(getattr(shipment, "address_line3", ""), 40),
-        "senderTaxId": (getattr(shipment, "tax_id", "") or "").strip()[:35],
-        "importerTaxId": (getattr(shipment, "importer_tax_id", "") or "").strip()[:35],
+        # Tax/customs references are only for non-EU destinations; for EU we
+        # send them empty so nothing prints on the label.
+        "senderTaxId": "" if country in _EU_COUNTRIES else (getattr(shipment, "tax_id", "") or "").strip()[:35],
+        "importerTaxId": "" if country in _EU_COUNTRIES else (getattr(shipment, "importer_tax_id", "") or "").strip()[:35],
         "city": _clean_text((shipment.city or "").rstrip(","), 30) or "City",
         "state": _clean_text(getattr(shipment, "state", ""), 30),
         "postalCode": ((shipment.postal_code or "").strip().upper()[:10]) or "0000",
