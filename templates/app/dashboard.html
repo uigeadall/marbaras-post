@@ -59,29 +59,14 @@
           </div>
         </div>
         <textarea id="paste-box" rows="4" autofocus placeholder="📋 Постави целия адрес тук — ще попълним полетата отдолу"></textarea>
-        <div class="ff"><label>Референция <span class="muted small">(твой номер — отива в DHL)</span></label><input type="text" name="reference" placeholder="напр. Amazon #028-..."></div>
-        <div class="ff"><label>Имейл <span class="req">*</span> <span class="muted small">(или телефон)</span></label><input type="email" name="recipient_email" id="f_email"></div>
-        <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
-        <div class="ff"><label>Име <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
-        <div class="ff"><label>Адрес (ред 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
-        <div class="ff"><label>Адрес (ред 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
-        <div class="ff"><label>Адрес (ред 3)</label><input type="text" name="address_line3" id="f_addr3"></div>
-        <div class="ff2">
-          <div class="ff"><label>Пощенски код <span class="req">*</span></label><input type="text" name="postal_code" id="f_postal" required></div>
-          <div class="ff"><label>Град <span class="req">*</span></label><input type="text" name="city" id="f_city" required></div>
+        <!-- 1: Държава -->
+        <div class="ff"><label>Държава <span class="req">*</span></label>
+          <select name="country" id="f_country" required>
+            <option value="">— Избери държава —</option>
+            {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
+          </select>
         </div>
-        <div class="ff2">
-          <div class="ff"><label>State / регион <span class="muted small">(по избор)</span></label><input type="text" name="state" id="f_state"></div>
-          <div class="ff"><label>Държава <span class="req">*</span></label>
-            <select name="country" id="f_country" required>
-              <option value="">— Избери държава —</option>
-              {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="ff"><label>Importer customs reference <span class="muted small">(по избор — напр. Etsy UK ДДС / EORI; ако го попълниш, излиза на етикета)</span></label>
-          <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  или  EORI: ...">
-        </div>
+        <!-- 2: Тегло -->
         <div class="ff"><label>Тегло на пратката <span class="muted small">(плик + продукт) (г)</span> <span class="req">*</span></label>
           <input type="number" name="weight_g" id="f_weight" min="1" placeholder="250">
           <div class="presets">
@@ -92,6 +77,28 @@
             <button type="button" onclick="setWeight(250)">250г</button>
           </div>
         </div>
+        <!-- 3: Референция -->
+        <div class="ff"><label>Референция <span class="muted small">(твой номер — отива в DHL)</span></label><input type="text" name="reference" placeholder="напр. Amazon #028-..."></div>
+        <!-- 4: Importer customs reference -->
+        <div class="ff"><label>Importer customs reference <span class="muted small">(по избор — напр. Etsy UK ДДС / EORI; ако го попълниш, излиза на етикета)</span></label>
+          <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  или  EORI: ...">
+        </div>
+        <!-- 5: Име -->
+        <div class="ff"><label>Име <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
+        <!-- 6: Имейл -->
+        <div class="ff"><label>Имейл <span class="req">*</span> <span class="muted small">(или телефон)</span></label><input type="email" name="recipient_email" id="f_email"></div>
+        <!-- 7: Телефон -->
+        <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
+        <!-- 8/9/10: Адрес -->
+        <div class="ff"><label>Адрес (ред 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
+        <div class="ff"><label>Адрес (ред 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
+        <div class="ff"><label>Адрес (ред 3)</label><input type="text" name="address_line3" id="f_addr3"></div>
+        <!-- 11: Пощенски код -->
+        <div class="ff"><label>Пощенски код <span class="req">*</span></label><input type="text" name="postal_code" id="f_postal" required></div>
+        <!-- 12: Град -->
+        <div class="ff"><label>Град <span class="req">*</span></label><input type="text" name="city" id="f_city" required></div>
+        <!-- 13: Регион -->
+        <div class="ff"><label>State / регион <span class="muted small">(по избор)</span></label><input type="text" name="state" id="f_state"></div>
 
         <!-- Митница — задължителна за дестинации извън ЕС -->
         <div id="customs-box" class="customs-box" hidden>
