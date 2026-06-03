@@ -32,16 +32,20 @@ def track(request):
 @login_required
 def dashboard(request):
     qs = Shipment.objects.all()
-    # Status filter tabs (a1post-style: Unsent / Prepared / Labelled / All).
     flt = request.GET.get("status", "active")
-    tabs = {
-        "active": qs.exclude(status__in=["shipped", "cancelled"]),
-        "draft": qs.filter(status="draft"),
-        "prepared": qs.filter(status="prepared"),
-        "label_created": qs.filter(status="label_created"),
-        "all": qs,
-    }
-    shipments = tabs.get(flt, tabs["active"])[:200]
+    # AWB filter: clicking an AWB shows only that AWB's parcels.
+    awb_filter = (request.GET.get("awb") or "").strip()
+    if awb_filter:
+        shipments = qs.filter(awb=awb_filter)[:200]
+    else:
+        tabs = {
+            "active": qs.exclude(status__in=["shipped", "cancelled"]),
+            "draft": qs.filter(status="draft"),
+            "prepared": qs.filter(status="prepared"),
+            "label_created": qs.filter(status="label_created"),
+            "all": qs,
+        }
+        shipments = tabs.get(flt, tabs["active"])[:200]
 
     # Open preparation orders (status=prepared, no AWB yet) — targets you can
     # still add more parcels to. Grouped by DPI order id.
@@ -75,6 +79,7 @@ def dashboard(request):
             "current_status": flt,
             "counts": counts,
             "open_orders": open_orders,
+            "awb_filter": awb_filter,
         },
     )
 

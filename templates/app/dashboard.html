@@ -143,19 +143,22 @@
       <div class="ship-card" id="unsent">
         <!-- табове по статус -->
         <div class="tabs">
-          <a href="?status=active" class="{% if current_status == 'active' %}on{% endif %}">Активни <span>{{ counts.active }}</span></a>
-          <a href="?status=draft" class="{% if current_status == 'draft' %}on{% endif %}">Неизпратени <span>{{ counts.draft }}</span></a>
-          <a href="?status=prepared" class="{% if current_status == 'prepared' %}on{% endif %}">Подготвят се <span>{{ counts.prepared }}</span></a>
-          <a href="?status=label_created" class="{% if current_status == 'label_created' %}on{% endif %}">С етикет <span>{{ counts.label_created }}</span></a>
-          <a href="?status=all" class="{% if current_status == 'all' %}on{% endif %}">Всички <span>{{ counts.all }}</span></a>
+          <a href="?status=active" class="{% if current_status == 'active' and not awb_filter %}on{% endif %}">Активни <span>{{ counts.active }}</span></a>
+          <a href="?status=draft" class="{% if current_status == 'draft' and not awb_filter %}on{% endif %}">Неизпратени <span>{{ counts.draft }}</span></a>
+          <a href="?status=prepared" class="{% if current_status == 'prepared' and not awb_filter %}on{% endif %}">Подготвят се <span>{{ counts.prepared }}</span></a>
+          <a href="?status=label_created" class="{% if current_status == 'label_created' and not awb_filter %}on{% endif %}">С етикет <span>{{ counts.label_created }}</span></a>
+          <a href="?status=all" class="{% if current_status == 'all' and not awb_filter %}on{% endif %}">Всички <span>{{ counts.all }}</span></a>
         </div>
+        {% if awb_filter %}
+        <div class="awb-banner">📦 Партида (AWB): <b class="mono">{{ awb_filter }}</b> <a href="?status=all">✕ Покажи всички</a></div>
+        {% endif %}
 
         <!-- основно действие: маркирай и натисни -->
         <div class="action-bar">
           <span class="sel-hint"><b id="sel-count">0</b> избрани</span>
           <button form="batch" formaction="{% url 'dispatch' %}" class="btn btn-primary" onclick="return confirmDispatch()">🚀 Изпрати и създай етикети</button>
           <button form="batch" formaction="{% url 'print_all' %}" formtarget="_blank" class="btn-mini blue">🖨️ Принтирай етикети</button>
-          <button form="batch" formaction="{% url 'combine' %}" class="btn-mini amber">📦 Само групирай</button>
+          <button form="batch" formaction="{% url 'combine' %}" class="btn-mini amber">📦 Създай партида</button>
           <button form="batch" formaction="{% url 'finalize' %}" class="btn-mini green2">✅ Финализирай</button>
           <button form="batch" formaction="{% url 'print_paperwork' %}" formtarget="_blank" class="btn-mini ink">🧾 Документи</button>
           <button form="batch" formaction="{% url 'cancel' %}" class="btn-mini red" onclick="return confirm('Да откажа ли избраните в DHL?')">🗑️ Откажи</button>
@@ -181,7 +184,7 @@
               <td>{{ s.recipient_name }}<br><span class="muted small">{{ s.city }}</span></td>
               <td>{{ s.country }}</td>
               <td><span class="st st-{{ s.status }}">{{ s.get_status_display }}</span></td>
-              <td class="mono small">{{ s.awb|default:"—" }}</td>
+              <td class="mono small">{% if s.awb %}<a href="?awb={{ s.awb }}" title="Покажи само тази партида">{{ s.awb }}</a>{% else %}—{% endif %}</td>
               <td class="mono small">{{ s.tracking_number|default:"—" }}</td>
               <td class="row-actions">
                 {% if s.dpi_item_id %}

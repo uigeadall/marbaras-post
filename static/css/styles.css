@@ -394,3 +394,9 @@ img { max-width: 100%; }
 .cp-row input:focus { outline:none; border-color:#1a1a1a; }
 .cp-del { background:#fff; border:1px solid #d4d4d8; border-radius:6px; cursor:pointer; color:#999; font-size:.78rem; padding:.3rem 0; }
 .cp-del:hover { border-color:#dc2626; color:#dc2626; }
+
+/* AWB filter */
+.awb-banner { display:flex; align-items:center; gap:.6rem; background:#f7f7f8; border:1px solid #e5e7eb; border-radius:8px; padding:.5rem .8rem; margin-bottom:.8rem; font-size:.85rem; }
+.awb-banner a { color:#1a1a1a; text-decoration:underline; margin-left:auto; font-weight:700; }
+.ship-table td a { color:#1a1a1a; text-decoration:underline; }
+.ship-table td a:hover { color:#000; }
