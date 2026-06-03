@@ -525,26 +525,70 @@ def get_item_labels_for_awb(awb: str) -> Optional[bytes]:
 
 
 def refit_pdf_to_4x6(pdf_bytes: bytes, margin_pt: float = 6.0) -> bytes:
-    """Scale-fit the first page onto an exact 4x6 inch page for thermal printers."""
+    """Crop the actual label out of the DHL PDF and scale-fit it onto an exact
+    4x6 inch page for thermal printers.
+
+    DPI returns the label on an A4/A5 page where the real label fills only the
+    TOP HALF (the rest is receipt / blank). Just scaling the whole page would
+    leave the label in half the 4x6, so we crop to the label region first.
+    Override the crop fraction with GLOBAL_MAIL_LABEL_TOP_CROP (default 0.5;
+    set to 1.0 to disable cropping).
+    """
     try:
         from pypdf import PdfReader, PdfWriter, Transformation
         from pypdf.generic import RectangleObject
 
-        TARGET_W, TARGET_H = 288.0, 432.0
+        TARGET_W, TARGET_H = 288.0, 432.0  # 4x6 inch at 72 dpi
         reader = PdfReader(BytesIO(pdf_bytes))
         if not reader.pages:
             return pdf_bytes
         src = reader.pages[0]
-        box = src.cropbox or src.mediabox
-        bw, bh = float(box.width), float(box.height)
-        if bw <= 0 or bh <= 0:
+
+        # Tightest box the PDF exposes: trim > crop > media.
+        box = None
+        for attr in ("trimbox", "cropbox", "mediabox"):
+            b = getattr(src, attr, None)
+            if b is not None and float(b.width) > 0 and float(b.height) > 0:
+                box = b
+                break
+        if box is None:
             return pdf_bytes
-        scale = min((TARGET_W - 2 * margin_pt) / bw, (TARGET_H - 2 * margin_pt) / bh)
-        tx = (TARGET_W - bw * scale) / 2 - float(box.left) * scale
-        ty = (TARGET_H - bh * scale) / 2 - float(box.bottom) * scale
+        x0, y0 = float(box.left), float(box.bottom)
+        bw, bh = float(box.width), float(box.height)
+
+        a4_ratio = 842.0 / 595.0  # ~1.414
+        ratio = bh / bw if bw else 0
+        looks_like_paper = (
+            abs(ratio - a4_ratio) < 0.06 or abs(ratio - 1.0 / a4_ratio) < 0.06
+        )
+        much_bigger = bw > TARGET_W * 1.3 or bh > TARGET_H * 1.3
+        if looks_like_paper and much_bigger and ratio > 1.0:
+            # A4/A5 portrait: label is in the top half — keep it.
+            y0 = y0 + bh / 2.0
+            bh = bh / 2.0
+        else:
+            # Already ~4x6 but content only fills the top: crop the top fraction.
+            try:
+                top = float(_cfg("GLOBAL_MAIL_LABEL_TOP_CROP", 0.5) or 0.5)
+            except (TypeError, ValueError):
+                top = 0.5
+            top = max(0.1, min(top, 1.0))
+            if ratio > 1.0 and top < 1.0:
+                keep = bh * top
+                y0 = y0 + (bh - keep)
+                bh = keep
+
+        inner_w = max(TARGET_W - 2 * margin_pt, 1.0)
+        inner_h = max(TARGET_H - 2 * margin_pt, 1.0)
+        scale = min(inner_w / bw, inner_h / bh)
+        tx = (TARGET_W - bw * scale) / 2.0 - x0 * scale
+        ty = (TARGET_H - bh * scale) / 2.0 - y0 * scale
+
         writer = PdfWriter()
         page = writer.add_blank_page(width=TARGET_W, height=TARGET_H)
-        page.merge_transformed_page(src, Transformation().scale(scale, scale).translate(tx, ty))
+        page.merge_transformed_page(
+            src, Transformation().scale(scale, scale).translate(tx, ty)
+        )
         for attr in ("mediabox", "cropbox", "trimbox"):
             setattr(page, attr, RectangleObject((0, 0, TARGET_W, TARGET_H)))
         out = BytesIO()
