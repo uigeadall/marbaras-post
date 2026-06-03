@@ -59,7 +59,9 @@
           </div>
         </div>
         <textarea id="paste-box" rows="4" autofocus placeholder="📋 Постави целия адрес тук — ще попълним полетата отдолу"></textarea>
+        <div class="ff"><label>Референция <span class="muted small">(твой номер — отива в DHL)</span></label><input type="text" name="reference" placeholder="напр. Amazon #028-..."></div>
         <div class="ff"><label>Имейл <span class="req">*</span> <span class="muted small">(или телефон)</span></label><input type="email" name="recipient_email" id="f_email"></div>
+        <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
         <div class="ff"><label>Име <span class="req">*</span></label><input type="text" name="recipient_name" id="f_name" required></div>
         <div class="ff"><label>Адрес (ред 1) <span class="req">*</span></label><input type="text" name="address_line1" id="f_addr1" required></div>
         <div class="ff"><label>Адрес (ред 2)</label><input type="text" name="address_line2" id="f_addr2"></div>
@@ -76,10 +78,6 @@
               {% for code, cname in countries %}<option value="{{ code }}">{{ cname }} ({{ code }})</option>{% endfor %}
             </select>
           </div>
-        </div>
-        <div class="ff2">
-          <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
-          <div class="ff"><label>Референция <span class="muted small">(твой номер — отива в DHL)</span></label><input type="text" name="reference" placeholder="напр. Amazon #028-..."></div>
         </div>
         <div class="ff"><label>Importer customs reference <span class="muted small">(по избор — напр. Etsy UK ДДС / EORI; ако го попълниш, излиза на етикета)</span></label>
           <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  или  EORI: ...">
