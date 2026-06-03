@@ -130,11 +130,64 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
     net = max(min(net, gross), 1)  # net must be ≥1g and never exceed gross
     value = max(round(float(shipment.value or 1), 2), 1.0)
     product = (shipment.product or "").strip() or resolve_product(country)
-    # DHL requires the content description to be 3–33 chars for cross-border
-    # products. Pad a too-short description so a real shipment can't fail.
-    desc = (shipment.description or "Goods").strip()[:33]
-    if len(desc) < 3:
-        desc = (desc + " goods").strip()[:33]
+
+    def _desc(d):
+        # DHL needs the description 3–33 chars for cross-border products.
+        d = _clean_text(d, 33)
+        if len(d) < 3:
+            d = (d + " goods").strip()[:33]
+        return d or "Goods"
+
+    hs_code = (getattr(shipment, "hs_code", "") or _cfg("GLOBAL_MAIL_HS_CODE", "711311"))
+    origin = (getattr(shipment, "origin_country", "") or _cfg("SHOP_COUNTRY", "BG"))
+
+    # Build one content piece per product line. contents_json (multiple
+    # products) wins; otherwise fall back to the single legacy fields.
+    rows = []
+    for ln in (getattr(shipment, "contents_json", None) or []):
+        if not isinstance(ln, dict) or not (ln.get("description") or "").strip():
+            continue
+        try:
+            q = max(int(ln.get("quantity") or 1), 1)
+        except (TypeError, ValueError):
+            q = 1
+        try:
+            v = max(round(float(ln.get("value") or 1), 2), 1.0)
+        except (TypeError, ValueError):
+            v = 1.0
+        try:
+            nw = int(ln.get("net_weight") or 0)
+        except (TypeError, ValueError):
+            nw = 0
+        rows.append({"description": _desc(ln["description"]), "quantity": q, "value": v, "net": nw})
+    if not rows:
+        rows = [{
+            "description": _desc(shipment.description or "Goods"),
+            "quantity": max(int(getattr(shipment, "quantity", 1) or 1), 1),
+            "value": value,
+            "net": net,
+        }]
+
+    # Net weights must each be ≥1 and sum to ≤ the parcel gross weight.
+    nets = [r["net"] for r in rows]
+    if sum(nets) <= 0 or sum(nets) > gross:
+        each = max(gross // len(rows), 1)
+        nets = [each] * len(rows)
+    nets = [max(n, 1) for n in nets]
+
+    contents = []
+    total_value = 0.0
+    for i, (r, nw) in enumerate(zip(rows, nets), 1):
+        contents.append({
+            "contentPieceAmount": r["quantity"],
+            "contentPieceDescription": r["description"],
+            "contentPieceHsCode": hs_code,
+            "contentPieceOrigin": origin,
+            "contentPieceValue": f'{r["value"]:.2f}',
+            "contentPieceNetweight": nw,
+        })
+        total_value += r["value"]
+    total_value = max(round(total_value, 2), 1.0)
     # Non-EU destinations require a recipient phone OR email. If the pasted
     # address has neither, fall back to a configured contact so it still books.
     phone = _sanitize_phone(shipment.recipient_phone)
@@ -168,7 +221,7 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         "state": _clean_text(getattr(shipment, "state", ""), 30),
         "postalCode": ((shipment.postal_code or "").strip().upper()[:10]) or "0000",
         "destinationCountry": country,
-        "shipmentAmount": value,
+        "shipmentAmount": total_value,
         "shipmentCurrency": (shipment.currency or "EUR").upper()[:3],
         "shipmentGrossWeight": gross,
         "shipmentNaturetype": getattr(shipment, "content_type", "") or "SALE_GOODS",
@@ -176,16 +229,7 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         # Customer reference: the operator's own (Reference field). Falls back to
         # an internal Sxx only when left blank, so DHL always has a reference.
         "custRef": ((getattr(shipment, "reference", "") or "").strip()[:28] or f"S{shipment.pk}"),
-        "contents": [
-            {
-                "contentPieceAmount": max(int(getattr(shipment, "quantity", 1) or 1), 1),
-                "contentPieceDescription": desc,
-                "contentPieceHsCode": (getattr(shipment, "hs_code", "") or _cfg("GLOBAL_MAIL_HS_CODE", "711311")),
-                "contentPieceOrigin": (getattr(shipment, "origin_country", "") or _cfg("SHOP_COUNTRY", "BG")),
-                "contentPieceValue": f"{value:.2f}",
-                "contentPieceNetweight": net,
-            }
-        ],
+        "contents": contents,
     }
 
 

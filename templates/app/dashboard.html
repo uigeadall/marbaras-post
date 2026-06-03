@@ -98,22 +98,24 @@
         <!-- Митница — задължителна за дестинации извън ЕС -->
         <div id="customs-box" class="customs-box" hidden>
           <div class="customs-title">🌍 Митница <span class="muted small">(задължителна извън ЕС)</span></div>
-          <div class="ff"><label>Описание (какъв е предметът) <span class="req">*</span></label>
-            <input type="text" name="description" list="content-list" value="Стоки">
-            <datalist id="content-list">
-              <option value="Silver ring"><option value="Silver earrings"><option value="Silver pendant">
-              <option value="Silver bracelet"><option value="Silver necklace"><option value="Silver jewellery">
-            </datalist>
-          </div>
-          <div class="ff2">
-            <div class="ff"><label>Количество</label><input type="number" name="quantity" min="1" value="1"></div>
-            <div class="ff"><label>Тегло на продукта <span class="muted small">(нето, г)</span></label><input type="number" name="net_weight_g" min="1" placeholder="напр. 5"></div>
-          </div>
-          <div class="ff2">
-            <div class="ff"><label>Цена на продукта</label><input type="number" step="0.01" name="value" placeholder="29.90"></div>
-            <div class="ff"><label>Валута</label>
-              <select name="currency"><option>EUR</option><option>BGN</option><option>CHF</option><option>GBP</option><option>USD</option></select>
+          <label class="cp-head">Продукти <span class="muted small">(добави няколко при нужда)</span></label>
+          <div class="cp-cols"><span>Описание (какъв е предметът)</span><span>Кол.</span><span>Тегло г</span><span>Цена</span><span></span></div>
+          <div id="cp-rows">
+            <div class="cp-row">
+              <input type="text" name="cp_description" list="content-list" value="Стоки" placeholder="напр. Silver ring">
+              <input type="number" name="cp_quantity" min="1" value="1">
+              <input type="number" name="cp_netweight" min="1" placeholder="5">
+              <input type="number" step="0.01" name="cp_value" placeholder="29.90">
+              <button type="button" class="cp-del" title="Премахни" onclick="delCpRow(this)">✕</button>
             </div>
+          </div>
+          <datalist id="content-list">
+            <option value="Silver ring"><option value="Silver earrings"><option value="Silver pendant">
+            <option value="Silver bracelet"><option value="Silver necklace"><option value="Silver jewellery">
+          </datalist>
+          <button type="button" class="btn-mini" style="margin:.2rem 0 .6rem;" onclick="addCpRow()">＋ Добави продукт</button>
+          <div class="ff"><label>Валута</label>
+            <select name="currency"><option>EUR</option><option>BGN</option><option>CHF</option><option>GBP</option><option>USD</option></select>
           </div>
           <div class="ff"><label>Тип съдържание</label>
             <select name="content_type">
@@ -252,7 +254,7 @@
 
   // Запомняй стойностите: помни последно използваните полета за пакета
   // (тегло/стойност/съдържание/валута/продукт/услуга/митница) в браузъра.
-  const REMEMBER = ['product','service_level','description','value','currency','weight_g','net_weight_g','quantity','content_type','hs_code','origin_country'];
+  const REMEMBER = ['product','service_level','currency','weight_g','content_type','hs_code','origin_country'];
   const form = document.querySelector('.a1-form');
   if(form){
     REMEMBER.forEach(n=>{
@@ -271,6 +273,20 @@
 
 // Бутони за бързо тегло.
 function setWeight(g){ var e=document.getElementById('f_weight'); if(e){ e.value=g; e.focus(); } }
+
+// Митница: няколко продукта (1 обица, 1 пръстен, 1 колие…).
+function addCpRow(){
+  var rows=document.getElementById('cp-rows');
+  if(!rows) return;
+  var r=rows.firstElementChild.cloneNode(true);
+  r.querySelectorAll('input').forEach(function(i){ i.value = (i.name==='cp_quantity') ? '1' : ''; });
+  rows.appendChild(r);
+  var f=r.querySelector('input'); if(f) f.focus();
+}
+function delCpRow(btn){
+  var rows=document.getElementById('cp-rows');
+  if(rows && rows.children.length>1) btn.closest('.cp-row').remove();
+}
 
 // Phone OR email is required (DHL needs at least one).
 function checkContact(){

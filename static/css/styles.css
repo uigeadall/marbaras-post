@@ -385,3 +385,12 @@ img { max-width: 100%; }
 /* login — neutral */
 .login-card { box-shadow: none; border: 1px solid #e5e7eb; }
 .login-card .btn-primary { background: #1a1a1a; border-color: #1a1a1a; }
+
+/* customs multi-product table */
+.cp-head { display:block; font-weight:700; font-size:.78rem; color:#374151; margin:.2rem 0; }
+.cp-cols { display:grid; grid-template-columns: 1fr 50px 58px 68px 24px; gap:.3rem; font-size:.62rem; color:#9aa0a6; padding:0 .1rem .15rem; }
+.cp-row { display:grid; grid-template-columns: 1fr 50px 58px 68px 24px; gap:.3rem; margin-bottom:.3rem; align-items:center; }
+.cp-row input { padding:.38rem .45rem; font-size:.82rem; border:1px solid #d4d4d8; border-radius:6px; width:100%; }
+.cp-row input:focus { outline:none; border-color:#1a1a1a; }
+.cp-del { background:#fff; border:1px solid #d4d4d8; border-radius:6px; cursor:pointer; color:#999; font-size:.78rem; padding:.3rem 0; }
+.cp-del:hover { border-color:#dc2626; color:#dc2626; }

@@ -105,6 +105,27 @@ def new_shipment(request):
     if not phone and not email:
         messages.error(request, "Въведи телефон ИЛИ имейл на получателя (поне едното е задължително).")
         return redirect("dashboard")
+
+    # Customs product lines (cp_* arrays — one row per product).
+    descs = request.POST.getlist("cp_description")
+    qtys = request.POST.getlist("cp_quantity")
+    netws = request.POST.getlist("cp_netweight")
+    vals = request.POST.getlist("cp_value")
+    lines = []
+    for i, d in enumerate(descs):
+        d = (d or "").strip()
+        if not d:
+            continue
+        lines.append({
+            "description": d[:64],
+            "quantity": int(qtys[i]) if i < len(qtys) and (qtys[i] or "").isdigit() else 1,
+            "net_weight": int(netws[i]) if i < len(netws) and (netws[i] or "").isdigit() else 0,
+            "value": str(_dec(vals[i], "1")) if i < len(vals) and vals[i] else "1",
+        })
+    # Primary fields for the list view come from the first line (or a default).
+    first = lines[0] if lines else {"description": "Goods", "quantity": 1, "value": "1", "net_weight": 0}
+    total_value = sum(_dec(l["value"], "1") for l in lines) if lines else Decimal("1")
+
     s = Shipment.objects.create(
         owner=request.user,
         reference=(g("reference") or "").strip(),
@@ -120,17 +141,18 @@ def new_shipment(request):
         country=(g("country") or "BG").strip().upper()[:2],
         product=(g("product") or "").strip(),
         service_level=(g("service_level") or "PRIORITY").strip(),
-        description=(g("description") or "Goods").strip(),
-        quantity=int(g("quantity")) if (g("quantity") or "").isdigit() else 1,
+        description=first["description"],
+        quantity=first["quantity"],
         weight_g=int(g("weight_g")) if (g("weight_g") or "").isdigit() else 100,
-        net_weight_g=int(g("net_weight_g")) if (g("net_weight_g") or "").isdigit() else 0,
-        value=_dec(g("value"), "1") if g("value") else Decimal("1"),
+        net_weight_g=int(first["net_weight"]),
+        value=total_value,
         currency=(g("currency") or "EUR").upper()[:3],
         content_type=(g("content_type") or "SALE_GOODS"),
         hs_code=(g("hs_code") or "711311").strip(),
         origin_country=(g("origin_country") or "BG").strip().upper()[:2],
         tax_id=(g("tax_id") or "").strip(),
         importer_tax_id=(g("importer_tax_id") or "").strip(),
+        contents_json=lines,
     )
     messages.success(request, f"✅ Пратка #{s.pk} създадена (Неизпратени). Маркирай я → 🚀 Изпрати, за да създадеш етикета.")
     return redirect("dashboard")

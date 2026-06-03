@@ -47,6 +47,9 @@ class Shipment(models.Model):
     net_weight_g = models.PositiveIntegerField(
         default=0, help_text="Net weight of the goods only (customs); 0 = use parcel weight"
     )
+    # Multiple customs content lines: [{description, quantity, net_weight, value}].
+    # Empty → fall back to the single description/quantity/value/net_weight_g.
+    contents_json = models.JSONField(default=list, blank=True)
     value = models.DecimalField(max_digits=10, decimal_places=2, default=1)
     currency = models.CharField(max_length=3, default="EUR")
     product = models.CharField(
