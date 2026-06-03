@@ -81,6 +81,9 @@
           <div class="ff"><label>Телефон <span class="req">*</span> <span class="muted small">(или имейл)</span></label><input type="text" name="recipient_phone" id="f_phone"></div>
           <div class="ff"><label>Референция <span class="muted small">(твой номер — отива в DHL)</span></label><input type="text" name="reference" placeholder="напр. Amazon #028-..."></div>
         </div>
+        <div class="ff"><label>Importer customs reference <span class="muted small">(по избор — напр. Etsy UK ДДС / EORI; ако го попълниш, излиза на етикета)</span></label>
+          <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  или  EORI: ...">
+        </div>
         <div class="ff"><label>Тегло на пратката <span class="muted small">(плик + продукт) (г)</span> <span class="req">*</span></label>
           <input type="number" name="weight_g" id="f_weight" min="1" placeholder="250">
           <div class="presets">
@@ -124,9 +127,6 @@
                 {% for code, cname in countries %}<option value="{{ code }}" {% if code == 'BG' %}selected{% endif %}>{{ cname }} ({{ code }})</option>{% endfor %}
               </select>
             </div>
-          </div>
-          <div class="ff"><label>Importer customs reference <span class="muted small">(напр. Etsy UK ДДС / EORI)</span></label>
-            <input type="text" name="importer_tax_id" placeholder="ETSY UK VAT:GB365883274  или  EORI: ...">
           </div>
           <div class="ff"><label>ДДС / IOSS на подателя <span class="muted small">(IOSS / VOEC)</span></label>
             <input type="text" name="tax_id" placeholder="IOSS: IM1234567890">

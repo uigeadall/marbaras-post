@@ -159,10 +159,11 @@ def build_item(shipment, *, finalize: bool = True) -> Dict[str, Any]:
         "addressLine1": _clean_text(shipment.address_line1, 40) or "Address",
         "addressLine2": _clean_text(shipment.address_line2, 40),
         "addressLine3": _clean_text(getattr(shipment, "address_line3", ""), 40),
-        # Tax/customs references are only for non-EU destinations; for EU we
-        # send them empty so nothing prints on the label.
+        # Sender IOSS/VOEC: only for non-EU (empty for EU).
         "senderTaxId": "" if country in _EU_COUNTRIES else (getattr(shipment, "tax_id", "") or "").strip()[:35],
-        "importerTaxId": "" if country in _EU_COUNTRIES else (getattr(shipment, "importer_tax_id", "") or "").strip()[:35],
+        # Importer customs reference: always sent when the operator fills it in
+        # (manual field) — prints on the label regardless of destination.
+        "importerTaxId": (getattr(shipment, "importer_tax_id", "") or "").strip()[:35],
         "city": _clean_text((shipment.city or "").rstrip(","), 30) or "City",
         "state": _clean_text(getattr(shipment, "state", ""), 30),
         "postalCode": ((shipment.postal_code or "").strip().upper()[:10]) or "0000",
