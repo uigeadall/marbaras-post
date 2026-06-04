@@ -14,28 +14,6 @@
       <div class="app-user"><a href="/admin/">Admin</a> · <a href="{% url 'logout' %}">Log out</a></div>
     </div>
 
-    <!-- operator nav (a1post style) -->
-    <nav class="op-nav">
-      <a href="{% url 'new_shipment' %}" class="active">New shipment (tracked)</a>
-      <a href="#" title="Coming soon">New (untracked)</a>
-      <a href="#" title="Coming soon">Express</a>
-      <a href="#" title="Coming soon">Calculator</a>
-      <a href="#" title="Coming soon">Return label</a>
-      <a href="#" title="Coming soon">Invoices</a>
-      <span class="op-sep"></span>
-      <b>Shipments:</b>
-      <a href="?status=draft">Unsent</a>
-      <a href="?status=all">All</a>
-      <a href="#" title="Coming soon">Deleted</a>
-      <a href="#" title="Coming soon">Returned</a>
-      <a href="#" title="Coming soon">Statistics</a>
-    </nav>
-
-    <div class="op-import">
-      <span class="muted small">Import:</span>
-      {% for n in INTEGRATIONS %}<span class="logo-chip sm">{{ n }}</span>{% endfor %}
-    </div>
-
     {% if messages %}
       <div class="flash">{% for m in messages %}<div class="flash-item {{ m.tags }}">{{ m }}</div>{% endfor %}</div>
     {% endif %}
