@@ -139,11 +139,11 @@
         <div class="action-bar">
           <span class="sel-hint"><b id="sel-count">0</b> selected</span>
           <button form="batch" formaction="{% url 'combine' %}" class="btn-mini amber">📦 Create batch</button>
-          <button form="batch" formaction="{% url 'finalize' %}" class="btn btn-primary" onclick="return confirmFinalize()">🎰 FINALIZE 🎰</button>
           <button form="batch" formaction="{% url 'print_all' %}" formtarget="_blank" class="btn-mini blue">🖨️ Print labels</button>
           <button form="batch" formaction="{% url 'remove_from_batch' %}" class="btn-mini" onclick="return confirm('Remove the selected shipments from their batch (back to Draft)?')">↩️ Remove from batch</button>
           <button form="batch" formaction="{% url 'print_paperwork' %}" formtarget="_blank" class="btn-mini ink">🧾 Paperwork</button>
           <button form="batch" formaction="{% url 'cancel' %}" class="btn-mini red" onclick="return confirm('Cancel the selected shipments at DHL?')">🗑️ Cancel</button>
+          <button form="batch" formaction="{% url 'finalize' %}" class="btn finalize-btn" onclick="return confirmFinalize(event)">✅ Finalize</button>
         </div>
 
         {% if open_orders %}
@@ -284,11 +284,35 @@ function checkContact(){
   return true;
 }
 
-// Finalize creates REAL billable labels — confirm and require a selection.
-function confirmFinalize(){
+// Finalize creates REAL billable labels — confirm, rain money, then submit.
+function confirmFinalize(ev){
   const n = document.querySelectorAll('.rowchk:checked').length;
   if(n === 0){ alert('First tick the prepared shipments you want to finalize.'); return false; }
-  return confirm('Finalize '+n+' shipment(s)?\n\nThis creates REAL billable labels at DHL. The whole batch is finalized — make sure these are the ones you want to ship.');
+  if(!confirm('Finalize '+n+' shipment(s)?\n\nThis creates REAL billable labels at DHL. The whole batch is finalized — make sure these are the ones you want to ship.')) return false;
+  // Make it rain, then submit after the animation starts.
+  const btn = ev && ev.target ? ev.target.closest('button') : null;
+  rainMoney();
+  setTimeout(function(){
+    if(btn && btn.form){ btn.form.action = btn.getAttribute('formaction'); btn.form.submit(); }
+  }, 1300);
+  return false; // hold the submit; we trigger it after the rain
+}
+
+function rainMoney(){
+  const layer = document.createElement('div');
+  layer.className = 'money-rain';
+  const emojis = ['💵','💶','💷','🤑','💴','💰'];
+  for(let i=0;i<48;i++){
+    const s = document.createElement('span');
+    s.textContent = emojis[i % emojis.length];
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.animationDuration = (1.1 + Math.random()*1.3) + 's';
+    s.style.animationDelay = (Math.random()*0.5) + 's';
+    s.style.fontSize = (18 + Math.random()*26) + 'px';
+    layer.appendChild(s);
+  }
+  document.body.appendChild(layer);
+  setTimeout(()=>layer.remove(), 3000);
 }
 </script>
 {% endblock %}
