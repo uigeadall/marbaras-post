@@ -21,6 +21,7 @@ urlpatterns = [
     path("app/combine/", views.combine, name="combine"),
     path("app/finalize/", views.finalize, name="finalize"),
     path("app/print-all/", views.print_all, name="print_all"),
+    path("app/print-zpl/", views.print_zpl, name="print_zpl"),
     path("app/paperwork/", views.print_paperwork, name="print_paperwork"),
     path("app/cancel/", views.cancel, name="cancel"),
     path("app/delete-all-labels/", views.delete_all_labels, name="delete_all_labels"),

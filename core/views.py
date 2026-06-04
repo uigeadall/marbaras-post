@@ -524,6 +524,30 @@ def print_all(request):
 
 @login_required
 @require_POST
+def print_zpl(request):
+    """Download the selected labels as ZPL for a thermal printer (Zebra ZP 505).
+    The printer draws the barcode at its native DPI → perfectly crisp."""
+    sel = _selected(request)
+    awbs = []
+    for s in sel:
+        if s.awb and s.awb not in awbs:
+            awbs.append(s.awb)
+    if not awbs:
+        messages.error(request, "The selected shipments have no AWB yet — finalize first.")
+        return redirect("dashboard")
+    rotated = request.POST.get("rotated") == "1"
+    parts = [z for z in (dpi.get_labels_zpl_for_awb(a, rotated) for a in awbs) if z]
+    if not parts:
+        messages.error(request, "Could not fetch ZPL — see the logs.")
+        return redirect("dashboard")
+    out = b"\n".join(parts)
+    resp = HttpResponse(out, content_type="application/octet-stream")
+    resp["Content-Disposition"] = 'attachment; filename="labels.zpl"'
+    return resp
+
+
+@login_required
+@require_POST
 def delete_all_labels(request):
     """Delete every shipment that already has a label/item at DHL.
 

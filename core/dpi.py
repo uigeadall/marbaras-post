@@ -581,6 +581,26 @@ def get_item_labels_for_awb(awb: str) -> Optional[bytes]:
     return r.content
 
 
+def get_labels_zpl_for_awb(awb: str, rotated: bool = False) -> Optional[bytes]:
+    """All labels for one AWB as ZPL (for thermal printers like the Zebra
+    ZP 505). The printer renders the barcode natively at its full DPI, so it
+    comes out perfectly crisp — unlike the low-resolution raster barcode DHL
+    embeds in the PDF."""
+    token = get_token()
+    if not token or not awb:
+        return None
+    accept = "application/zpl+rotated+6x4" if rotated else "application/zpl+6x4"
+    r = _http(
+        "GET",
+        f"{_host()}/dpi/shipping/v1/shipments/{awb}/itemlabels",
+        headers={"Authorization": f"Bearer {token}", "Accept": accept},
+        timeout=60,
+    )
+    if r is None or r.status_code != 200 or not r.content:
+        return None
+    return r.content
+
+
 def refit_pdf_to_4x6(pdf_bytes: bytes, margin_pt: float = 6.0) -> bytes:
     """Return the DHL label at its natural size so it fills the whole page.
 
