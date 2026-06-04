@@ -442,3 +442,35 @@ img { max-width: 100%; }
 .app .btn-lg { padding: .55rem 1rem; font-size: .9rem; }
 .app .cp-row input { padding: .3rem .4rem; font-size: .78rem; }
 .app .cp-head { margin: .1rem 0; }
+
+/* ===== Casino-style Finalize button ===== */
+.app .action-bar .btn.btn-primary {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .8rem 1.8rem;
+  border-radius: 12px;
+  color: #2a1500 !important;
+  background: linear-gradient(180deg, #ffe88a 0%, #f4bf3a 48%, #d98c00 100%);
+  border: 2px solid #b06f00 !important;
+  box-shadow: 0 0 0 2px #7a4d00, 0 6px 0 #9c6400, 0 10px 18px rgba(0,0,0,.35),
+              inset 0 1px 0 rgba(255,255,255,.7);
+  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+  position: relative;
+  animation: casinoGlow 1.6s ease-in-out infinite;
+  transition: transform .06s ease, box-shadow .06s ease;
+}
+.app .action-bar .btn.btn-primary:hover {
+  background: linear-gradient(180deg, #fff0a0 0%, #f8c84a 48%, #e89400 100%);
+  transform: translateY(-1px);
+}
+.app .action-bar .btn.btn-primary:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 2px #7a4d00, 0 2px 0 #9c6400, 0 4px 8px rgba(0,0,0,.3),
+              inset 0 1px 0 rgba(255,255,255,.6);
+}
+@keyframes casinoGlow {
+  0%,100% { box-shadow: 0 0 0 2px #7a4d00, 0 6px 0 #9c6400, 0 10px 18px rgba(0,0,0,.35), 0 0 10px rgba(255,200,60,.5), inset 0 1px 0 rgba(255,255,255,.7); }
+  50%     { box-shadow: 0 0 0 2px #7a4d00, 0 6px 0 #9c6400, 0 10px 22px rgba(0,0,0,.4), 0 0 22px rgba(255,210,80,.95), inset 0 1px 0 rgba(255,255,255,.8); }
+}
