@@ -535,7 +535,7 @@ def print_zpl(request):
     if not awbs:
         messages.error(request, "The selected shipments have no AWB yet — finalize first.")
         return redirect("dashboard")
-    rotated = request.POST.get("rotated") == "1"
+    rotated = request.POST.get("rotated") == "1" or request.GET.get("rotated") == "1"
     parts = [z for z in (dpi.get_labels_zpl_for_awb(a, rotated) for a in awbs) if z]
     if not parts:
         messages.error(request, "Could not fetch ZPL — see the logs.")
