@@ -495,16 +495,15 @@ def dispatch(request):
 @login_required
 @require_POST
 def print_all(request):
-    """One PDF with every label for the selected shipments' AWB(s)."""
+    """One PDF with every selected label, merged. Fetches each shipment's own
+    4x6 item label (same as the single Print button) so the bulk PDF is
+    consistent and upright — not the landscape bulk-AWB format."""
     sel = _selected(request)
-    awbs = []
-    for s in sel:
-        if s.awb and s.awb not in awbs:
-            awbs.append(s.awb)
-    if not awbs:
-        messages.error(request, "The selected shipments have no AWB yet — finalize first.")
+    items = [s for s in sel if s.dpi_item_id]
+    if not items:
+        messages.error(request, "The selected shipments have no label yet — finalize first.")
         return redirect("dashboard")
-    pdfs = [p for p in (dpi.get_item_labels_for_awb(a) for a in awbs) if p]
+    pdfs = [p for p in (dpi.get_item_label(s.dpi_item_id) for s in items) if p]
     if not pdfs:
         messages.error(request, "Could not fetch the labels — see the logs.")
         return redirect("dashboard")
@@ -519,7 +518,7 @@ def print_all(request):
                 w.add_page(pg)
         buf = BytesIO(); w.write(buf); out = buf.getvalue()
     resp = HttpResponse(out, content_type="application/pdf")
-    resp["Content-Disposition"] = 'inline; filename="awb-labels.pdf"'
+    resp["Content-Disposition"] = 'inline; filename="labels.pdf"'
     return resp
 
 
