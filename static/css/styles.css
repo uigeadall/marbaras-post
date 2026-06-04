@@ -473,3 +473,6 @@ img { max-width: 100%; }
   animation: fieldPulse .9s ease-in-out 2;
 }
 @keyframes fieldPulse { 0%,100%{ box-shadow:0 0 0 3px rgba(220,38,38,.18);} 50%{ box-shadow:0 0 0 5px rgba(220,38,38,.32);} }
+
+/* Bigger paste box */
+.app #paste-box { min-height: 110px; font-size: .9rem; padding: .7rem .8rem; line-height: 1.45; }
