@@ -140,7 +140,6 @@
           <span class="sel-hint"><b id="sel-count">0</b> selected</span>
           <button form="batch" formaction="{% url 'combine' %}" class="btn-mini amber">📦 Create batch</button>
           <button form="batch" formaction="{% url 'print_all' %}" formtarget="_blank" class="btn-mini blue" title="Sharp barcodes (rendered from ZPL)">🖨️ Print labels</button>
-          <button form="batch" formaction="{% url 'print_zpl' %}?rotated=1" class="btn-mini" title="Raw ZPL for thermal printers">🏷️ ZPL</button>
           <button form="batch" formaction="{% url 'remove_from_batch' %}" class="btn-mini" onclick="return confirm('Remove the selected shipments from their batch (back to Draft)?')">↩️ Remove from batch</button>
           <button form="batch" formaction="{% url 'print_paperwork' %}" formtarget="_blank" class="btn-mini ink">🧾 Paperwork</button>
           <button form="batch" formaction="{% url 'cancel' %}" class="btn-mini red" onclick="return confirm('Cancel the selected shipments at DHL?')">🗑️ Cancel</button>
@@ -273,38 +272,47 @@ function delCpRow(btn){
   if(rows && rows.children.length>1) btn.closest('.cp-row').remove();
 }
 
-// Required-field checks on submit.
+// Highlight a single field that needs filling, then stop.
+function flagField(el){
+  if(!el) return false;
+  document.querySelectorAll('.field-error').forEach(function(e){ e.classList.remove('field-error'); });
+  el.classList.add('field-error');
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+  el.focus();
+  el.addEventListener('input', function(){ el.classList.remove('field-error'); }, {once:true});
+  return false;
+}
+
+// Required-field checks on submit — flags only the empty field.
 function checkContact(){
-  var phone = (document.getElementById('f_phone')||{}).value || '';
-  var email = (document.getElementById('f_email')||{}).value || '';
-  if(!phone.trim() && !email.trim()){
-    alert('Enter a recipient phone OR email — at least one is required.');
-    (document.getElementById('f_phone')||{}).focus && document.getElementById('f_phone').focus();
-    return false;
+  var phone = (document.getElementById('f_phone')||{});
+  var email = (document.getElementById('f_email')||{});
+  if(!(phone.value||'').trim() && !(email.value||'').trim()){
+    return flagField(phone);   // phone OR email — flag phone
   }
-  // Reference required.
-  var ref = (document.getElementById('f_reference')||{}).value || '';
-  if(!ref.trim()){
-    alert('Reference is required.');
-    document.getElementById('f_reference').focus();
-    return false;
+  var ref = document.getElementById('f_reference');
+  if(ref && !(ref.value||'').trim()){
+    return flagField(ref);
   }
   // Outside the EU: customs declaration required (at least one full product line).
   var EU = new Set(['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE']);
   var country = (document.getElementById('f_country')||{}).value || '';
   if(country && !EU.has(country)){
     var rows = document.querySelectorAll('#cp-rows .cp-row');
-    var ok = false;
+    var ok = false, firstRow = rows[0];
     rows.forEach(function(r){
       var d=(r.querySelector('[name=cp_description]')||{}).value||'';
       var w=(r.querySelector('[name=cp_netweight]')||{}).value||'';
       var v=(r.querySelector('[name=cp_value]')||{}).value||'';
       if(d.trim() && parseFloat(w)>0 && parseFloat(v)>0) ok=true;
     });
-    if(!ok){
-      alert('For non-EU destinations fill in the customs declaration: each product\'s description, weight and value.');
-      var box=document.getElementById('customs-box'); if(box) box.scrollIntoView({behavior:'smooth'});
-      return false;
+    if(!ok && firstRow){
+      // flag whichever of the first row's three fields is empty
+      var d=firstRow.querySelector('[name=cp_description]');
+      var w=firstRow.querySelector('[name=cp_netweight]');
+      var v=firstRow.querySelector('[name=cp_value]');
+      var target = (!(d.value||'').trim()) ? d : (!parseFloat(w.value)>0 ? w : v);
+      return flagField(target || d);
     }
   }
   return true;
