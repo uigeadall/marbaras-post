@@ -495,29 +495,38 @@ def dispatch(request):
 @login_required
 @require_POST
 def print_all(request):
-    """One PDF with every selected label, merged. Fetches each shipment's own
-    4x6 item label (same as the single Print button) so the bulk PDF is
-    consistent and upright — not the landscape bulk-AWB format."""
+    """One sharp PDF with every selected label. Fetches DHL's ZPL per AWB and
+    renders it to a crisp 6x4 PDF (vector barcode), so it prints sharp through
+    a normal driver. Falls back to DHL's raster PDF if rendering is unavailable."""
     sel = _selected(request)
-    items = [s for s in sel if s.dpi_item_id]
-    if not items:
-        messages.error(request, "The selected shipments have no label yet — finalize first.")
+    awbs = []
+    for s in sel:
+        if s.awb and s.awb not in awbs:
+            awbs.append(s.awb)
+    if not awbs:
+        messages.error(request, "The selected shipments have no AWB yet — finalize first.")
         return redirect("dashboard")
-    pdfs = [p for p in (dpi.get_item_label(s.dpi_item_id) for s in items) if p]
-    if not pdfs:
+
+    from io import BytesIO
+    from pypdf import PdfReader, PdfWriter
+
+    pages = PdfWriter()
+    n = 0
+    used_fallback = False
+    for a in awbs:
+        zpl = dpi.get_labels_zpl_for_awb(a, rotated=True)
+        pdf = dpi.render_zpl_to_pdf(zpl) if zpl else None
+        if not pdf:
+            pdf = dpi.get_item_labels_for_awb(a)  # raster fallback
+            used_fallback = used_fallback or bool(pdf)
+        if pdf:
+            for pg in PdfReader(BytesIO(pdf)).pages:
+                pages.add_page(pg); n += 1
+    if not n:
         messages.error(request, "Could not fetch the labels — see the logs.")
         return redirect("dashboard")
-    if len(pdfs) == 1:
-        out = pdfs[0]
-    else:
-        from io import BytesIO
-        from pypdf import PdfReader, PdfWriter
-        w = PdfWriter()
-        for p in pdfs:
-            for pg in PdfReader(BytesIO(p)).pages:
-                w.add_page(pg)
-        buf = BytesIO(); w.write(buf); out = buf.getvalue()
-    resp = HttpResponse(out, content_type="application/pdf")
+    buf = BytesIO(); pages.write(buf)
+    resp = HttpResponse(buf.getvalue(), content_type="application/pdf")
     resp["Content-Disposition"] = 'inline; filename="labels.pdf"'
     return resp
 

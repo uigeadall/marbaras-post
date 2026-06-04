@@ -581,6 +581,33 @@ def get_item_labels_for_awb(awb: str) -> Optional[bytes]:
     return r.content
 
 
+def render_zpl_to_pdf(zpl: bytes, dpmm: int = 8) -> Optional[bytes]:
+    """Render ZPL to a crisp 6x4 PDF via Labelary, so the barcode (drawn from
+    the ZPL ^BC command) prints sharp through a normal printer driver — instead
+    of DHL's low-res raster barcode. Returns PDF bytes or None.
+
+    Note: the label content (incl. address) is sent to api.labelary.com for
+    rendering. Set LABELARY_URL to a self-hosted instance to avoid that.
+    """
+    if not zpl:
+        return None
+    base = _cfg("LABELARY_URL", "https://api.labelary.com")
+    try:
+        r = requests.post(
+            f"{base}/v1/printers/{dpmm}dpmm/labels/6x4/",
+            headers={"Accept": "application/pdf"},
+            data=zpl,
+            timeout=60,
+        )
+    except requests.RequestException as exc:
+        logger.error("Labelary render failed: %s", exc)
+        return None
+    if r.status_code != 200 or r.content[:4] != b"%PDF":
+        logger.error("Labelary %s: %s", r.status_code, (r.text or "")[:200])
+        return None
+    return r.content
+
+
 def get_labels_zpl_for_awb(awb: str, rotated: bool = False) -> Optional[bytes]:
     """All labels for one AWB as ZPL (for thermal printers like the Zebra
     ZP 505). The printer renders the barcode natively at its full DPI, so it
