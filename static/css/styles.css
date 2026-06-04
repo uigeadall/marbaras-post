@@ -424,3 +424,21 @@ img { max-width: 100%; }
 /* Weight presets always on one row */
 .presets.one-row { flex-wrap: nowrap; }
 .presets.one-row button { flex: 1; padding: .22rem .2rem; }
+
+/* ===== Extra-compact operator form ===== */
+.app { padding: 1rem 0; }
+.app .a1-form { gap: .3rem; }
+.app .ff { gap: 1px; }
+.app .ff label { font-size: .68rem; margin-bottom: 0; line-height: 1.15; }
+.app .ff label .muted.small { font-size: .62rem; font-weight: 500; }
+.app .ff input, .app .ff select { padding: .32rem .5rem; font-size: .82rem; border-radius: 5px; }
+.app #paste-box { padding: .45rem .6rem; font-size: .8rem; border-radius: 5px; margin-bottom: .15rem; }
+.app .ff2 { gap: .4rem; }
+.app .gen-box { padding: .5rem; border-radius: 6px; margin-bottom: .1rem; }
+.app .customs-box { padding: .55rem; border-radius: 6px; gap: .3rem; }
+.app .presets { margin-top: .2rem; gap: .2rem; }
+.app .presets button { padding: .2rem .3rem; font-size: .72rem; border-radius: 5px; }
+.app .paste-card { padding: .8rem; }
+.app .btn-lg { padding: .55rem 1rem; font-size: .9rem; }
+.app .cp-row input { padding: .3rem .4rem; font-size: .78rem; }
+.app .cp-head { margin: .1rem 0; }
