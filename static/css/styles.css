@@ -420,3 +420,7 @@ img { max-width: 100%; }
 .app .gen-box, .app .customs-box, .app .ship-card, .app .paste-card,
 .app .action-bar, .app .addbatch-bar { border-color: #000 !important; }
 .app .presets button, .app .cp-del { border-color: #000 !important; }
+
+/* Weight presets always on one row */
+.presets.one-row { flex-wrap: nowrap; }
+.presets.one-row button { flex: 1; padding: .22rem .2rem; }
