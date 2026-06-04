@@ -428,6 +428,47 @@ def add_to_batch(request):
 
 @login_required
 @require_POST
+def remove_from_batch(request):
+    """Take selected PREPARED (not yet finalized) shipments out of their batch.
+
+    Deletes the item from the open DHL order and resets the shipment back to
+    a Draft, so it can be re-batched later. Lets you finalize the rest of the
+    batch without it. Finalized shipments (with an AWB) can't be removed.
+    """
+    sel = _selected(request)
+    removed = locked = skipped = 0
+    for s in sel:
+        if s.awb:  # already finalized — can't pull out
+            locked += 1
+            continue
+        if s.status != "prepared" or not s.dpi_item_id:
+            skipped += 1
+            continue
+        res = dpi.delete_item(s.dpi_item_id)
+        if res.get("ok"):
+            s.status = "draft"
+            s.dpi_order_id = ""
+            s.dpi_item_id = ""
+            s.tracking_number = ""
+            s.awb = ""
+            s.notes = "Removed from batch — back to Draft."
+            s.save()
+            removed += 1
+        else:
+            s.notes = f"Remove failed: {res.get('error')}"
+            s.save(update_fields=["notes"])
+            skipped += 1
+    if removed:
+        messages.success(request, f"↩️ Removed {removed} shipment(s) from the batch — they're Drafts again.")
+    if locked:
+        messages.warning(request, f"{locked} already have an AWB (finalized) — can't be removed.")
+    if skipped:
+        messages.info(request, f"{skipped} skipped (not in a batch or failed).")
+    return redirect("dashboard")
+
+
+@login_required
+@require_POST
 def dispatch(request):
     """One-click: combine + finalize the selected drafts into one shared AWB
     with printable labels. The easy path — does both steps at once."""

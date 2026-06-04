@@ -17,6 +17,7 @@ urlpatterns = [
     # batch / AWB flow
     path("app/dispatch/", views.dispatch, name="dispatch"),
     path("app/add-to-batch/", views.add_to_batch, name="add_to_batch"),
+    path("app/remove-from-batch/", views.remove_from_batch, name="remove_from_batch"),
     path("app/combine/", views.combine, name="combine"),
     path("app/finalize/", views.finalize, name="finalize"),
     path("app/print-all/", views.print_all, name="print_all"),
