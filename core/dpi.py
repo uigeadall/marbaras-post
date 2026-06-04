@@ -581,6 +581,23 @@ def get_item_labels_for_awb(awb: str) -> Optional[bytes]:
     return r.content
 
 
+def get_item_zpl(item_id: str) -> Optional[bytes]:
+    """ZPL for a single item — works for OPEN/prepared items too (no AWB
+    needed), so labels can be shown/printed before finalizing."""
+    token = get_token()
+    if not token or not item_id:
+        return None
+    r = _http(
+        "GET",
+        f"{_host()}/dpi/shipping/v1/items/{item_id}/label",
+        headers={"Authorization": f"Bearer {token}", "Accept": "application/zpl+6x4"},
+        timeout=30,
+    )
+    if r is None or r.status_code != 200 or not r.content:
+        return None
+    return r.content
+
+
 def render_zpl_to_pdf(zpl: bytes, dpmm: int = 8) -> Optional[bytes]:
     """Render ZPL to a crisp 6x4 PDF via Labelary, so the barcode (drawn from
     the ZPL ^BC command) prints sharp through a normal printer driver — instead

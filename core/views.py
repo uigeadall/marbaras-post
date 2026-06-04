@@ -495,16 +495,15 @@ def dispatch(request):
 @login_required
 @require_POST
 def print_all(request):
-    """One sharp PDF with every selected label. Fetches DHL's ZPL per AWB and
-    renders it to a crisp 6x4 PDF (vector barcode), so it prints sharp through
-    a normal driver. Falls back to DHL's raster PDF if rendering is unavailable."""
+    """One sharp PDF with every selected label — WITHOUT finalizing.
+
+    Works on prepared items too (after Create batch): fetches each item's own
+    ZPL and renders it to a crisp 6x4 PDF (vector barcode). No AWB / finalize
+    needed. Falls back to the raster item label if rendering is unavailable."""
     sel = _selected(request)
-    awbs = []
-    for s in sel:
-        if s.awb and s.awb not in awbs:
-            awbs.append(s.awb)
-    if not awbs:
-        messages.error(request, "The selected shipments have no AWB yet — finalize first.")
+    items = [s for s in sel if s.dpi_item_id]
+    if not items:
+        messages.error(request, "Select shipments that have a label (use “Create batch” first).")
         return redirect("dashboard")
 
     from io import BytesIO
@@ -512,13 +511,11 @@ def print_all(request):
 
     pages = PdfWriter()
     n = 0
-    used_fallback = False
-    for a in awbs:
-        zpl = dpi.get_labels_zpl_for_awb(a, rotated=False)
+    for s in items:
+        zpl = dpi.get_item_zpl(s.dpi_item_id)
         pdf = dpi.render_zpl_to_pdf(zpl) if zpl else None
         if not pdf:
-            pdf = dpi.get_item_labels_for_awb(a)  # raster fallback
-            used_fallback = used_fallback or bool(pdf)
+            pdf = dpi.get_item_label(s.dpi_item_id)  # raster fallback
         if pdf:
             for pg in PdfReader(BytesIO(pdf)).pages:
                 pages.add_page(pg); n += 1
