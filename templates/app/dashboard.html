@@ -20,7 +20,7 @@
 
     <div class="app-grid a1">
       <!-- CREATE FORM -->
-      <form class="paste-card a1-form" method="post" action="{% url 'new_shipment' %}" onsubmit="return checkContact()">
+      <form class="paste-card a1-form" method="post" action="{% url 'new_shipment' %}" novalidate onsubmit="return checkContact()">
         {% csrf_token %}
         <div class="gen-box">
           <div class="ff2">
