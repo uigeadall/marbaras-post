@@ -8,7 +8,8 @@
     <div class="login-card">
       <span class="kicker center" style="display:block;width:max-content;margin:0 auto;">Operator</span>
       <h1 class="section-title">Log in to {{ BRAND.name }}</h1>
-      {% if form.errors %}<p class="login-err">Wrong username or password.</p>{% endif %}
+      {% if locked %}<p class="login-err">Too many failed attempts. Try again in ~{{ lockout_minutes }} minutes.</p>
+      {% elif form.errors %}<p class="login-err">Wrong username or password.</p>{% endif %}
       <form method="post" class="login-form">
         {% csrf_token %}
         <label>Username<input type="text" name="username" autofocus required></label>

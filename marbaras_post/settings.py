@@ -113,6 +113,35 @@ if _database_url:
         _database_url, conn_max_age=600, ssl_require=False
     )
 
+# Shared, persistent cache (Postgres) — used for login throttling so the
+# lockout works across gunicorn workers. Locally this is SQLite.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "mpost_cache",
+    }
+}
+
+# --- Bot / brute-force protection on the login ---
+LOGIN_MAX_ATTEMPTS = int(env("LOGIN_MAX_ATTEMPTS", "8") or 8)
+LOGIN_LOCKOUT_SECONDS = int(env("LOGIN_LOCKOUT_SECONDS", "900") or 900)
+
+# --- Production security (only when not running in local DEBUG) ---
+# Railway/Render terminate TLS and forward the original scheme in this header.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT", "True").lower() in (
+        "1", "true", "yes", "on",
+    )
+    SECURE_HSTS_SECONDS = 2592000  # 30 days
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    X_FRAME_OPTIONS = "DENY"
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
