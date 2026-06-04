@@ -514,7 +514,7 @@ def print_all(request):
     n = 0
     used_fallback = False
     for a in awbs:
-        zpl = dpi.get_labels_zpl_for_awb(a, rotated=True)
+        zpl = dpi.get_labels_zpl_for_awb(a, rotated=False)
         pdf = dpi.render_zpl_to_pdf(zpl) if zpl else None
         if not pdf:
             pdf = dpi.get_item_labels_for_awb(a)  # raster fallback
