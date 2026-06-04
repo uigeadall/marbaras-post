@@ -58,7 +58,7 @@
         </div>
         <!-- Reference + Importer customs ref -->
         <div class="ff2">
-          <div class="ff"><label>Reference <span class="muted small">(your no.)</span></label><input type="text" name="reference" placeholder="e.g. Amazon #028-..."></div>
+          <div class="ff"><label>Reference <span class="req">*</span> <span class="muted small">(your no.)</span></label><input type="text" name="reference" id="f_reference" placeholder="e.g. Amazon #028-..." required></div>
           <div class="ff"><label>Importer customs ref <span class="muted small">(opt.)</span></label><input type="text" name="importer_tax_id" placeholder="ETSY UK VAT / EORI"></div>
         </div>
         <!-- Name -->
@@ -273,7 +273,7 @@ function delCpRow(btn){
   if(rows && rows.children.length>1) btn.closest('.cp-row').remove();
 }
 
-// Phone OR email is required (DHL needs at least one).
+// Required-field checks on submit.
 function checkContact(){
   var phone = (document.getElementById('f_phone')||{}).value || '';
   var email = (document.getElementById('f_email')||{}).value || '';
@@ -281,6 +281,31 @@ function checkContact(){
     alert('Enter a recipient phone OR email — at least one is required.');
     (document.getElementById('f_phone')||{}).focus && document.getElementById('f_phone').focus();
     return false;
+  }
+  // Reference required.
+  var ref = (document.getElementById('f_reference')||{}).value || '';
+  if(!ref.trim()){
+    alert('Reference is required.');
+    document.getElementById('f_reference').focus();
+    return false;
+  }
+  // Outside the EU: customs declaration required (at least one full product line).
+  var EU = new Set(['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE']);
+  var country = (document.getElementById('f_country')||{}).value || '';
+  if(country && !EU.has(country)){
+    var rows = document.querySelectorAll('#cp-rows .cp-row');
+    var ok = false;
+    rows.forEach(function(r){
+      var d=(r.querySelector('[name=cp_description]')||{}).value||'';
+      var w=(r.querySelector('[name=cp_netweight]')||{}).value||'';
+      var v=(r.querySelector('[name=cp_value]')||{}).value||'';
+      if(d.trim() && parseFloat(w)>0 && parseFloat(v)>0) ok=true;
+    });
+    if(!ok){
+      alert('For non-EU destinations fill in the customs declaration: each product\'s description, weight and value.');
+      var box=document.getElementById('customs-box'); if(box) box.scrollIntoView({behavior:'smooth'});
+      return false;
+    }
   }
   return true;
 }

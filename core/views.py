@@ -111,6 +111,14 @@ def new_shipment(request):
     if not phone and not email:
         messages.error(request, "Enter a recipient phone OR email (at least one is required).")
         return redirect("dashboard")
+    # Reference is required.
+    if not (g("reference") or "").strip():
+        messages.error(request, "Reference is required.")
+        return redirect("dashboard")
+
+    country = (g("country") or "BG").strip().upper()[:2]
+    _EU = {"AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE",
+           "IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE"}
 
     # Customs product lines (cp_* arrays — one row per product).
     descs = request.POST.getlist("cp_description")
@@ -128,6 +136,21 @@ def new_shipment(request):
             "net_weight": int(netws[i]) if i < len(netws) and (netws[i] or "").isdigit() else 0,
             "value": str(_dec(vals[i], "1")) if i < len(vals) and vals[i] else "1",
         })
+
+    # Outside the EU the customs declaration is mandatory — at least one product
+    # line with a description, a value > 0 and a net weight > 0.
+    if country not in _EU:
+        valid = [
+            l for l in lines
+            if l["description"] and _dec(l["value"], "0") > 0 and l["net_weight"] > 0
+        ]
+        if not valid:
+            messages.error(
+                request,
+                "For non-EU destinations the customs declaration is required: "
+                "fill in each product's description, weight and value.",
+            )
+            return redirect("dashboard")
     # Primary fields for the list view come from the first line (or a default).
     first = lines[0] if lines else {"description": "Goods", "quantity": 1, "value": "1", "net_weight": 0}
     total_value = sum(_dec(l["value"], "1") for l in lines) if lines else Decimal("1")
@@ -144,7 +167,7 @@ def new_shipment(request):
         city=(g("city") or "").strip(),
         state=(g("state") or "").strip(),
         postal_code=(g("postal_code") or "").strip(),
-        country=(g("country") or "BG").strip().upper()[:2],
+        country=country,
         product=(g("product") or "").strip(),
         service_level=(g("service_level") or "PRIORITY").strip(),
         description=first["description"],
