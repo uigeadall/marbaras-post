@@ -409,3 +409,14 @@ img { max-width: 100%; }
 .customs-box { padding: .7rem; gap: .4rem; }
 .presets { margin-top: .25rem; gap: .25rem; }
 .presets button { padding: .22rem .5rem; font-size: .75rem; }
+
+/* Black borders on form fields (gray backgrounds stay) */
+.app .ff input, .app .ff select, .app .paste-card textarea,
+.app .cp-row input, .app #paste-box {
+  border: 1px solid #000 !important;
+}
+.app .ff input:focus, .app .ff select:focus, .app .paste-card textarea:focus,
+.app .cp-row input:focus { border-color: #000 !important; box-shadow: 0 0 0 1px #000; }
+.app .gen-box, .app .customs-box, .app .ship-card, .app .paste-card,
+.app .action-bar, .app .addbatch-bar { border-color: #000 !important; }
+.app .presets button, .app .cp-del { border-color: #000 !important; }
