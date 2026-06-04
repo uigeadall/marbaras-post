@@ -107,14 +107,25 @@ def parse_blocks(text: str) -> List[Dict[str, Any]]:
         name = kept[0]
         middle = kept[1:]
 
-        # Postal/city = the lowest remaining line that contains a digit.
+        # Find the lowest line that contains a digit — that's the postal line.
         pc_idx, postal, city = None, "", ""
         for i in range(len(middle) - 1, -1, -1):
             if any(c.isdigit() for c in middle[i]):
                 pc_idx = i
                 postal, city = split_postal_city(middle[i])
                 break
-        street_lines = middle[:pc_idx] if pc_idx is not None else middle
+
+        if pc_idx is not None:
+            # Case A: the postal line is JUST a postal code (e.g. "71409"),
+            # so the city is the line ABOVE it (Amazon layout: city / postal).
+            if not city and pc_idx - 1 >= 0:
+                city = middle[pc_idx - 1].strip()
+                street_lines = middle[: pc_idx - 1]
+            else:
+                # Case B: postal + city on the same line (e.g. "4492 Tecknau").
+                street_lines = middle[:pc_idx]
+        else:
+            street_lines = middle
 
         results.append({
             "recipient_name": name,
