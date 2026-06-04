@@ -138,10 +138,9 @@
         <!-- primary action: select rows then click -->
         <div class="action-bar">
           <span class="sel-hint"><b id="sel-count">0</b> selected</span>
-          <button form="batch" formaction="{% url 'dispatch' %}" class="btn btn-primary" onclick="return confirmDispatch()">🚀 Dispatch & create labels</button>
-          <button form="batch" formaction="{% url 'print_all' %}" formtarget="_blank" class="btn-mini blue">🖨️ Print labels</button>
           <button form="batch" formaction="{% url 'combine' %}" class="btn-mini amber">📦 Create batch</button>
-          <button form="batch" formaction="{% url 'finalize' %}" class="btn-mini green2">✅ Finalize</button>
+          <button form="batch" formaction="{% url 'finalize' %}" class="btn btn-primary" onclick="return confirmFinalize()">✅ Finalize</button>
+          <button form="batch" formaction="{% url 'print_all' %}" formtarget="_blank" class="btn-mini blue">🖨️ Print labels</button>
           <button form="batch" formaction="{% url 'remove_from_batch' %}" class="btn-mini" onclick="return confirm('Remove the selected shipments from their batch (back to Draft)?')">↩️ Remove from batch</button>
           <button form="batch" formaction="{% url 'print_paperwork' %}" formtarget="_blank" class="btn-mini ink">🧾 Paperwork</button>
           <button form="batch" formaction="{% url 'cancel' %}" class="btn-mini red" onclick="return confirm('Cancel the selected shipments at DHL?')">🗑️ Cancel</button>
@@ -285,11 +284,11 @@ function checkContact(){
   return true;
 }
 
-// Dispatch creates REAL billable labels — confirm and require a selection.
-function confirmDispatch(){
+// Finalize creates REAL billable labels — confirm and require a selection.
+function confirmFinalize(){
   const n = document.querySelectorAll('.rowchk:checked').length;
-  if(n === 0){ alert('First tick the shipments you want to dispatch.'); return false; }
-  return confirm('Dispatch '+n+' shipment(s)? This creates REAL labels at DHL on one shared AWB.');
+  if(n === 0){ alert('First tick the prepared shipments you want to finalize.'); return false; }
+  return confirm('Finalize '+n+' shipment(s)?\n\nThis creates REAL billable labels at DHL. The whole batch is finalized — make sure these are the ones you want to ship.');
 }
 </script>
 {% endblock %}
