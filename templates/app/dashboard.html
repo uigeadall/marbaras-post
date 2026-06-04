@@ -167,7 +167,7 @@
               <td>{{ s.country }}</td>
               <td><span class="st st-{{ s.status }}">{{ s.get_status_display }}</span></td>
               <td class="mono small">{% if s.awb %}<a href="?awb={{ s.awb }}" title="Show only this batch">{{ s.awb }}</a>{% else %}—{% endif %}</td>
-              <td class="mono small">{% if s.tracking_number %}<a href="https://www.deutschepost.de/sendung/simpleQueryResult.html?form.sendungsnummer={{ s.tracking_number }}" target="_blank" title="Track at Deutsche Post">{{ s.tracking_number }}</a>{% else %}—{% endif %}</td>
+              <td class="mono small">{% if s.tracking_number %}<a href="https://www.dhl.com/global-en/home/tracking/tracking-global-forwarding.html?submit=1&tracking-id={{ s.tracking_number }}" target="_blank" title="Track at DHL">{{ s.tracking_number }}</a>{% else %}—{% endif %}</td>
               <td class="row-actions">
                 {% if s.dpi_item_id %}
                   {% if s.awb %}
