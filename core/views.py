@@ -317,6 +317,28 @@ def _selected(request):
     return list(Shipment.objects.filter(pk__in=ids).order_by("id"))
 
 
+@login_required
+@require_POST
+def delete_drafts(request):
+    """Permanently delete selected DRAFT shipments (not yet at DHL).
+
+    Only removes drafts that have no DHL item — prepared/finalized shipments
+    are left untouched (cancel/remove-from-batch those first)."""
+    sel = _selected(request)
+    drafts = [s for s in sel if s.status == "draft" and not s.dpi_item_id]
+    skipped = len(sel) - len(drafts)
+    if not drafts:
+        messages.error(request, "Select draft shipments to delete (only un-batched drafts can be deleted).")
+        return redirect("dashboard")
+    n = len(drafts)
+    Shipment.objects.filter(pk__in=[s.pk for s in drafts]).delete()
+    msg = f"🗑️ Deleted {n} draft(s)."
+    if skipped:
+        msg += f" {skipped} skipped (already at DHL — cancel those first)."
+    messages.success(request, msg)
+    return redirect("dashboard")
+
+
 def _do_combine(shipments):
     """Create OPEN prep orders for the given draft shipments. Returns
     ``(prepared, failed, order_ids)``."""
